@@ -1,0 +1,3 @@
+-- Create a small stub to wrap the main classes.
+-- need to get a way to get the classes transformed into reasonable data structures
+--- classes: read the whole collection into an array
