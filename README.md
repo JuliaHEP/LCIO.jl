@@ -1,3 +1,13 @@
--- Create a small stub to wrap the main classes.
--- need to get a way to get the classes transformed into reasonable data structures
---- classes: read the whole collection into an array
+LCIO bindings for Julia
+=======================
+
+Installation Instructions
+-------------------------
+```
+bash
+cd /path/to/lcio
+source setup.sh
+julia
+Pkg.clone("https://github.com/jstrube/LCIO.jl")
+Pkg.build("LCIO")
+```
