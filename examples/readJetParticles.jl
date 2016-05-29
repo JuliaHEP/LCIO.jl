@@ -1,4 +1,3 @@
-push!(LOAD_PATH, "..")
 using LCIO
 using DataStructures
 
