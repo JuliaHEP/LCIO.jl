@@ -22,11 +22,11 @@ function plotHist(histogram, label)
 	h5write(filename, "yaxis", collect(yaxis))
 	#p = pcolormesh(xaxis, yaxis, histogram.weights')
 	#colorbar(p)
-	#savefig("$(label)barrelHitmap.png")
+	#savefig(" $(label)barrelHitmap.png" )
 	#clf()
 	#data = histogram.weights[:]
 	#plt[:hist](data, bins=linspace(1, maximum(data)), log=true)
-	#savefig("$(label)barrelHitDistribution.svg")
+	#savefig(" $(label)barrelHitDistribution.svg" )
 	#clf()
 end
 

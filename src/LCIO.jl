@@ -1,21 +1,42 @@
 module LCIO
-import Base: start, done, next, length
-export Vec, getCollection, getCollectionNames, getP4, getSimCaloHit, getCollectionTypeName, numberOfElements, getHitMCParticles, getMCPGenStatus, getMCPDGid, getRelationFrom, getRelationTo, getHitEnergy, getHitEnergyList, getCaloHit, getSimCaloHitId, getCaloHitId, getMCP4, getPosition
+using Cxx
+import Base: getindex, start, done, next, length, +
+export Vec, getCollection, getCollectionNames, getP4, LCIOopen, getPosition
 
-const libLCIO = joinpath(dirname(@__FILE__), "..", "deps", "lcio_jl")
+addHeaderDir(joinpath(ENV["LCIO"], "include"), kind=C_User)
+Libdl.dlopen(joinpath(ENV["LCIO"], "lib", "liblcio"), Libdl.RTLD_GLOBAL)
+
+cxx"""
+#include "lcio.h"
+#include "IO/LCReader.h"
+#include "IOIMPL/LCFactory.h"
+#include "EVENT/LCEvent.h"
+#include "EVENT/LCCollection.h"
+#include "EVENT/MCParticle.h"
+#include "EVENT/SimCalorimeterHit.h"
+#include "EVENT/TrackerHit.h"
+#include "EVENT/SimTrackerHit.h"
+#include "EVENT/Track.h"
+#include "EVENT/ReconstructedParticle.h"
+#include "EVENT/Vertex.h"
+#include "EVENT/LCRelation.h"
+#include <vector>
+#include <iostream>
+#include <string>
+IO::LCReader* reader = IOIMPL::LCFactory::getInstance()->createLCReader();
+"""
 
 function __init__()
-	global LCIOReader = ccall((:lcrdrcreate, libLCIO), Ptr{Void}, ())
+	global reader = icxx"reader;"
 	atexit() do
 		# delete reader
-		if ccall((:lcrdrdelete, libLCIO), Cint, (Ptr{Void},), LCIOReader) == 0
-			println("Delete Reader failed")
-		end
+		icxx"delete reader;"
 	end
 end
 
+
 immutable Vec
-    x::Cdouble
+	x::Cdouble
 	y::Cdouble
 	z::Cdouble
 	t::Cdouble
@@ -34,153 +55,93 @@ immutable CalHit
 	E::Cfloat
 end
 
-# constructor to set energy to new value explicitly
-# "calibration"
-CalHit(h::CalHit, e) = CalHit(h.x, h.y, h.z, e)
+typealias VectorStringP cxxt"const std::vector<std::string>*"
+
+start(it::VectorStringP) = 0
+next(it::VectorStringP,i) = (it[i], i+1)
+done(it::VectorStringP,i) = i >= length(it)
+getindex(it::VectorStringP,i) = String( icxx"$(it)->at($i).c_str();" )
+length(it::VectorStringP) = icxx"$(it)->size();"
 
 # The iterators use the events as state
 # the lcio reader returns NULL at the end of the file
 # Because the LCIO getNext function could re-use the memory for the next event,
 # the next function should not hold the current and next event at the same time.
 # Returning current and reading nextEvent as the new state causes memory corruption
-type LCIOIterator
-	current::Ptr{Void}
+
+type EventIterator
+	current::cxxt"EVENT::LCEvent*"
+end
+start(it::EventIterator) = C_NULL
+next(it::EventIterator, state) = (it.current, C_NULL)
+function done(it::EventIterator,state)
+	it.current = icxx"reader->readNextEvent();"
+	isdone = icxx"not $(it.current);"
+	if isdone
+		icxx"reader->close();"
+	end
+	isdone
 end
 
 # open file with reader, returns iterator
-function open(fn::AbstractString)
-	if ccall((:lcrdropen, libLCIO), Cint, (Ptr{Void}, Ptr{UInt8}), LCIOReader, fn) == 0
-		println("File open failed")
-	end
-	return LCIOIterator(C_NULL)
+function LCIOopen(fn::AbstractString)
+	icxx"reader->open($fn);"
+	# returns an iterator, initialized with a nullptr
+	# the iterator knows about the global reader object
+	return EventIterator( icxx"(EVENT::LCEvent*)NULL;" )
 end
 
-function start(r::LCIOIterator)
-	return "start"
+immutable LCCollection{T}
+	coll::cxxt"EVENT::LCCollection*"
 end
 
-function done(r::LCIOIterator, state)
-	r.current = readNext()
-	if r.current == C_NULL
-		# close file
-		if ccall((:lcrdrclose, libLCIO), Cint, (Ptr{Void},), LCIOReader) == 0
-			println("File close failed")
-		end
-	end
-	return r.current == C_NULL
+typealias SimCalorimeterHit cxxt"EVENT::SimCalorimeterHit*"
+typealias TrackerHit cxxt"EVENT::TrackerHit*"
+typealias SimTrackerHit cxxt"EVENT::SimTrackerHit*"
+typealias MCParticle cxxt"EVENT::MCParticle*"
+typealias Track cxxt"EVENT::Track*"
+
+# map from names stored in collection to actual types
+LCIOTypemap = Dict(
+	"SimCalorimeterHit" => SimCalorimeterHit,
+	"TrackerHit" => TrackerHit,
+	"SimTrackerHit" => SimTrackerHit,
+	"MCParticle" => MCParticle,
+	"Track" => Track,
+)
+
+start(it::LCCollection) = 0
+done(it::LCCollection, i) = i >= length(it)
+next{T}(it::LCCollection{T}, i) = icxx"static_cast<$(T)>($(it.coll)->getElementAt($(i)));", i+1
+length(it::LCCollection) = icxx"$(it.coll)->getNumberOfElements();"
+
+function getCollection(event, collectionName)
+	name =  pointer(collectionName)
+	collection = icxx"""$(event)->getCollection($(name));"""
+	collectionType = icxx"$(collection)->getTypeName().c_str();"
+	return LCCollection{LCIOTypemap[String(collectionType)]}(collection)
 end
 
-function next(r::LCIOIterator, state)
-	return r.current, "OK"
+getCollectionTypeName(collection::LCCollection) = String( icxx"$(collection)->getTypeName().c_str();" )
+getCollectionNames(event) = icxx"$(event)->getCollectionNames();"
+
+getEnergy(particle) = icxx"$(particle)->getEnergy();"
+function getMomentum(particle)
+	p3 = icxx"$(particle)->getMomentum();"
+	ThreeVec(unsafe_load(p3, 1), unsafe_load(p3, 2), unsafe_load(p3, 3))
+end
+function getPosition(hit)
+	pos = icxx"$(hit)->getPosition();"
+	ThreeVec(unsafe_load(pos, 1), unsafe_load(pos, 2), unsafe_load(pos, 3))
 end
 
-# read one event
-function readNext()
-	return ccall((:lcrdrreadnextevent, libLCIO), Ptr{Void}, (Ptr{Void},), LCIOReader)
+function getP4(particle)
+	p3 = icxx"$(particle)->getMomentum();"
+	e = icxx"$(particle)->getEnergy();"
+	Vec(unsafe_load(p3, 1), unsafe_load(p3, 2), unsafe_load(p3, 3), e)
 end
 
-# returns names for collections in event
-function getCollectionNameArray(event::Ptr{Void})
-	nameArray = AbstractString[]
-	nNames = ccall((:lcevtgetcollectionnamecount, libLCIO), Cint, (Ptr{Void},), event)
-	for n in 1:nNames
-		name = ccall((:lcevtgetcollectionname, libLCIO), Ptr{UInt8}, (Ptr{Void}, Csize_t), event, n-1)
-		push!(nameArray, bytestring(name))
-	end
-	return nameArray
-end
 
-immutable LCCollectionIterator
-	coll::Ptr{Void}
-	numberOfElements::Cint
-end
-
-function start(i::LCCollectionIterator)
-	return 1
-end
-
-function done(i::LCCollectionIterator, state)
-	return state > i.numberOfElements
-end
-
-function next(i::LCCollectionIterator, state)
-	return ccall((:lccolgetelementat, libLCIO), Ptr{Void}, (Ptr{Void}, Cint), i.coll, state-1), state+1
-end
-
-length(i::LCCollectionIterator) = numberOfElements(i.coll)
-
-# access a collection
-function getCollection(event::Ptr{Void}, name::AbstractString)
-	coll = ccall((:lcevtgetcollection, libLCIO), Ptr{Void}, (Ptr{Void}, Ptr{UInt8}), event, name)
-	return LCCollectionIterator(coll, numberOfElements(coll))
-end
-
-function getCollectionTypeName(collection::LCCollectionIterator)
-	return bytestring(ccall((:lccolgettypename, libLCIO), Ptr{UInt8}, (Ptr{Void},), collection.coll))
-end
-
-# print number of elements
-numberOfElements(coll::Ptr{Void}) = ccall((:lccolgetnumberofelements, libLCIO), Cint, (Ptr{Void}, ), coll)
-
-getMCP4(mcp::Ptr{Void}) = ccall((:lcmcpgetp4, libLCIO), Vec, (Ptr{Void},), mcp)
-function getMCMomentum(mcp::Ptr{Void})
-	p = ccall((:lcmcpgetmomentum, libLCIO), Ptr{Cdouble}, (Ptr{Void},), mcp)
-	return pointer_to_array(p, 3)
-end
-
-getP4(particle::Ptr{Void}) = ccall((:lcgetp4, libLCIO), Vec, (Ptr{Void},), particle)
-
-# returns the covarianceMatrix from the lower diagonal representation of the symmetric matrix on the c side
-function getCovMatrix(vtx::Ptr{Void})
-	cov = ccall((:lcvtxgetcovmatrix, libLCIO), Ptr{Cfloat}, (vtx,))
-	return [unsafe_load(cov, 1) unsafe_load(cov, 2) unsafe_load(cov, 4);
-			unsafe_load(cov, 2) unsafe_load(cov, 3) unsafe_load(cov, 5);
-			unsafe_load(cov, 4) unsafe_load(cov, 5) unsafe_load(cov, 6)]
-end
-
-# returns a Julia array with the floats from the float* on the C side
-# the correct length is obtained from another call on the c side
-function getVtxParameters(vtx::Ptr{Void})
-	nParams = Ref{Csize_t}(0)
-	parVec = ccall((:lcvtxgetparameters, libLCIO), Ptr{Cfloat}, (Ptr{Void}, Ref{Csize_t}), vtx, nParams)
-	parameters = Cfloat[]
-	for i in 1:nParams[]
-		push!(parameters, unsafe_load(parVec, i))
-	end
-	return parameters
-end
-
-# returns the list of ReconstructedParticles from a ReconstructedParticle (e.g. a jet)
-getHitType(hit::Ptr{Void}) = ccall((:lccahgettype, libLCIO), Cint, (hit,))
-
-
-# converts the std::vector to a Julia Array
-function getParticles(rp::Ptr{Void})
-	nParticles = Ref{Csize_t}(0)
-	pList = ccall((:lcrcpgetparticles, libLCIO), Ptr{Ptr{Void}}, (Ptr{Void}, Ref{Csize_t}), rp, nParticles)
-	particleList = Ptr{Void}[]
-	for i in 1:nParticles[]
-		push!(particleList, unsafe_load(pList, i))
-	end
-	return particleList
-end
-
-include("CaloHit.jl")
-include("MCparticle.jl")
-
-getRelationFrom(mcp::Ptr{Void}) = ccall((:lcrelgetfrom, libLCIO), Ptr{Void}, (Ptr{Void}, ), mcp)
-getRelationTo(mcp::Ptr{Void}) = ccall((:lcrelgetto, libLCIO), Ptr{Void}, (Ptr{Void}, ), mcp)
-
-
-getPositionVec(hit::Ptr{Void}) = ccall((:lcsthgetposition, libLCIO), ThreeVec, (Ptr{Void}, ), hit)
-
-function getPosition(hit::Ptr{Void})
-	pos = ccall((:lcsthgetposition, libLCIO), Ptr{Cdouble}, (Ptr{Void},), hit)
-	return [unsafe_load(pos, 1) unsafe_load(pos, 2) unsafe_load(pos, 3)]
-end
-
-function addLCIOCollection(outFile, collection, collectionName, collectionType, eventIndex)
-end
-
+include("MCParticle.jl")
 
 end # module
