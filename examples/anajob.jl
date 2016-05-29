@@ -1,4 +1,3 @@
-push!(LOAD_PATH, "..")
 using LCIO
 
 for (idx, event) in enumerate(LCIO.open(ARGS[1]))
