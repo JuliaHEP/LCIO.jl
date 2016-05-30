@@ -2,7 +2,7 @@ using Cxx
 using LCIO
 
 function testReader(fn::AbstractString)
-	for event in LCIOopen(fn)
+	for event in LCIO.open(fn)
 		println(event)
 		for x in getCollectionNames(event)
  			println(x, "\t", String( icxx"$(event)->getCollection($(x))->getTypeName().c_str();") )

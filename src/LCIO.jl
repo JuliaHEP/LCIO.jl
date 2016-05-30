@@ -88,7 +88,7 @@ function done(it::EventIterator,state)
 end
 
 # open file with reader, returns iterator
-function LCIOopen(fn::AbstractString)
+function open(fn::AbstractString)
 	icxx"""$(reader)->open($(fn));"""
 	# returns an iterator, initialized with a nullptr
 	# the iterator knows about the global reader object
