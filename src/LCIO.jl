@@ -1,3 +1,5 @@
+# not sure if this module can be __precompile__()'ed as is.
+# the cxx compilation _might_ be OK, but the reader allocation should go into __init__
 module LCIO
 using Cxx
 import Base: getindex, start, done, next, length, +
@@ -23,14 +25,12 @@ cxx"""
 #include <vector>
 #include <iostream>
 #include <string>
-IO::LCReader* reader = IOIMPL::LCFactory::getInstance()->createLCReader();
 """
 
 function __init__()
-	global reader = icxx"reader;"
+	global reader = icxx"IOIMPL::LCFactory::getInstance()->createLCReader();"
 	atexit() do
-		# delete reader
-		icxx"delete reader;"
+		icxx"delete $(reader);"
 	end
 end
 
@@ -42,11 +42,15 @@ immutable Vec
 	t::Cdouble
 end
 
++(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z, a.t+b.t)
+
 immutable ThreeVec
 	x::Cdouble
 	y::Cdouble
 	z::Cdouble
 end
+
++(a::ThreeVec, b::ThreeVec) = ThreeVec(a.x+b.x, a.y+b.y, a.z+b.z)
 
 immutable CalHit
 	x::Cfloat
@@ -75,17 +79,17 @@ end
 start(it::EventIterator) = C_NULL
 next(it::EventIterator, state) = (it.current, C_NULL)
 function done(it::EventIterator,state)
-	it.current = icxx"reader->readNextEvent();"
+	it.current = icxx"$(reader)->readNextEvent();"
 	isdone = icxx"not $(it.current);"
 	if isdone
-		icxx"reader->close();"
+		icxx"$(reader)->close();"
 	end
 	isdone
 end
 
 # open file with reader, returns iterator
 function LCIOopen(fn::AbstractString)
-	icxx"reader->open($fn);"
+	icxx"""$(reader)->open($(fn));"""
 	# returns an iterator, initialized with a nullptr
 	# the iterator knows about the global reader object
 	return EventIterator( icxx"(EVENT::LCEvent*)NULL;" )
@@ -116,8 +120,7 @@ next{T}(it::LCCollection{T}, i) = icxx"static_cast<$(T)>($(it.coll)->getElementA
 length(it::LCCollection) = icxx"$(it.coll)->getNumberOfElements();"
 
 function getCollection(event, collectionName)
-	name =  pointer(collectionName)
-	collection = icxx"""$(event)->getCollection($(name));"""
+	collection = icxx"""$(event)->getCollection($(collectionName));"""
 	collectionType = icxx"$(collection)->getTypeName().c_str();"
 	return LCCollection{LCIOTypemap[String(collectionType)]}(collection)
 end
@@ -143,5 +146,6 @@ end
 
 
 include("MCParticle.jl")
+include("CaloHit.jl")
 
 end # module

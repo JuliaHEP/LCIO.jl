@@ -10,9 +10,9 @@ function testReader(fn::AbstractString)
 		for item in getCollection(event, "MCParticle")
 			println(getP4(item))
 		end
-		for item in getCollection(event, "SiVertexBarrelHits")
+		for item in getCollection(event, "EcalBarrHits")
 			println(getPosition(item))
 		end
 	end
 end
-testReader("../SingleParticles/singlemu+_10__scint3x3_mu+_SIM.slcio")
+testReader("../test/test.slcio")
