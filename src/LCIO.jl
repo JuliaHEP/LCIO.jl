@@ -3,7 +3,7 @@
 module LCIO
 using Cxx
 import Base: getindex, start, done, next, length, +
-export Vec, getCollection, getCollectionNames, getP4, LCIOopen, getPosition
+export Vec, getCollection, getCollectionNames, getCollectionTypeName, getP4, getPosition
 
 addHeaderDir(joinpath(ENV["LCIO"], "include"), kind=C_User)
 Libdl.dlopen(joinpath(ENV["LCIO"], "lib", "liblcio"), Libdl.RTLD_GLOBAL)
@@ -22,6 +22,7 @@ cxx"""
 #include "EVENT/ReconstructedParticle.h"
 #include "EVENT/Vertex.h"
 #include "EVENT/LCRelation.h"
+#include "EVENT/LCGenericObject.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -95,6 +96,8 @@ function open(fn::AbstractString)
 	return EventIterator( icxx"(EVENT::LCEvent*)NULL;" )
 end
 
+# We would like to have a typed collection, but what getCollection returns is unfortunately untyped
+# The type is established by reading its name from the collection and mapping it in the LCIOTypemap
 immutable LCCollection{T}
 	coll::cxxt"EVENT::LCCollection*"
 end
@@ -104,6 +107,8 @@ typealias TrackerHit cxxt"EVENT::TrackerHit*"
 typealias SimTrackerHit cxxt"EVENT::SimTrackerHit*"
 typealias MCParticle cxxt"EVENT::MCParticle*"
 typealias Track cxxt"EVENT::Track*"
+typealias LCGenericObject cxxt"EVENT::LCGenericObject*"
+
 
 # map from names stored in collection to actual types
 LCIOTypemap = Dict(
@@ -112,6 +117,7 @@ LCIOTypemap = Dict(
 	"SimTrackerHit" => SimTrackerHit,
 	"MCParticle" => MCParticle,
 	"Track" => Track,
+	"LCGenericObject" => LCGenericObject,
 )
 
 start(it::LCCollection) = 0
@@ -125,7 +131,7 @@ function getCollection(event, collectionName)
 	return LCCollection{LCIOTypemap[String(collectionType)]}(collection)
 end
 
-getCollectionTypeName(collection::LCCollection) = String( icxx"$(collection)->getTypeName().c_str();" )
+getCollectionTypeName(collection::LCCollection) = String( icxx"$(collection.coll)->getTypeName().c_str();" )
 getCollectionNames(event) = icxx"$(event)->getCollectionNames();"
 
 getEnergy(particle) = icxx"$(particle)->getEnergy();"
