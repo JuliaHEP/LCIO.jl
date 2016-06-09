@@ -95,11 +95,11 @@ void* lcevtgetcollection(void* event, const char* colname){
    return LCIO::SUCCESS ;
  }
 
- int lcevtsetdetectorname( void* event,  char* dn ){
-   LCEventImpl* evt = static_cast<LCEventImpl*>(event) ;
-   evt->setDetectorName( dn ) ;
-   return LCIO::SUCCESS ;
- }
+ // int lcevtsetdetectorname( void* event,  char* dn ){
+ //   LCEventImpl* evt = static_cast<LCEventImpl*>(event) ;
+ //   evt->setDetectorName( dn ) ;
+ //   return LCIO::SUCCESS ;
+ // }
 
  int lcevtsettimestamp( void* event,  long ts ){
    LCEventImpl* evt = static_cast<LCEventImpl*>(event) ;

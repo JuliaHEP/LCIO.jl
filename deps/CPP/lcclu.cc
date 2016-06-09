@@ -82,9 +82,10 @@ const void* lcclugetclusters( void* cluster ) {
   return &clu->getClusters();
 }
 
-const void* lcclugetcalorimeterhits( void* cluster ) {
+const void* lcclugetcalorimeterhits( void* cluster, size_t* nHits) {
   ClusterImpl* clu = static_cast<ClusterImpl*>( cluster ) ;
-  return &clu->getCalorimeterHits();
+  *nHits = clu->getCalorimeterHits().size();
+  return &clu->getCalorimeterHits()[0];
 }
 
 const void* lcclugetsubdetectorenergies( void* cluster ) {

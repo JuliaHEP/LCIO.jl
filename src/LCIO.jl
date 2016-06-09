@@ -179,7 +179,19 @@ function getPosition(hit::Ptr{Void})
 	return [unsafe_load(pos, 1) unsafe_load(pos, 2) unsafe_load(pos, 3)]
 end
 
-function addLCIOCollection(outFile, collection, collectionName, collectionType, eventIndex)
+
+function getParticleHits(rp::Ptr{Void})
+	hitList = CalHit[]
+	nClusters = Ref{Csize_t}(0)
+	cList = ccall((:lcrcpgetclusters, libLCIO), Ptr{Ptr{Void}}, (Ptr{Void}, Ref{Csize_t}), rp, nClusters)
+	for i in 1:nClusters[]
+		nHits = Ref{Csize_t}(0)
+		hitCollection = ccall((:lcclugetcalorimeterhits, libLCIO), Ptr{Ptr{Void}}, (Ptr{Void}, Ref{Csize_t}), unsafe_load(cList, i), nHits)
+		for j in 1:nHits[]
+			push!(hitList, getCaloHit(unsafe_load(hitCollection, j)))
+		end
+	end
+	return hitList
 end
 
 

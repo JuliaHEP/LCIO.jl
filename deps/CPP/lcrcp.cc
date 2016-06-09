@@ -95,9 +95,10 @@ const void* lcrcpgetparticles( void* recopart, size_t* nParticles ) {
   return &rcp->getParticles()[0];
 }
 
-const void* lcrcpgetclusters( void* recopart ) {
-  ReconstructedParticleImpl* rcp = static_cast<ReconstructedParticleImpl*>( recopart ) ;
-  return &rcp->getClusters();
+const void* lcrcpgetclusters( void* recopart, size_t* nClusters ) {
+  ReconstructedParticleImpl* rcp = static_cast<ReconstructedParticleImpl*>( recopart );
+  *nClusters = rcp->getClusters().size();
+  return &rcp->getClusters()[0];
 }
 
 

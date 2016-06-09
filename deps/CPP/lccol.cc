@@ -20,9 +20,9 @@ using namespace std ;
 
 extern "C" {
 
-void* lccolcreate( const char* colname ){
-  return new LCCollectionVec( colname ) ;
-}
+// void* lccolcreate( const char* colname ){
+//   return new LCCollectionVec( colname ) ;
+// }
 
 int lccoldelete( void* collection ){
   LCCollectionVec* col = static_cast<LCCollectionVec*>(collection) ;
