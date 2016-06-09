@@ -2,7 +2,7 @@ module LCIO
 import Base: start, done, next, length
 export Vec, getCollection, getCollectionNames, getP4, getSimCaloHit, getCollectionTypeName, numberOfElements, getHitMCParticles, getMCPGenStatus, getMCPDGid, getRelationFrom, getRelationTo, getHitEnergy, getHitEnergyList, getCaloHit, getSimCaloHitId, getCaloHitId, getMCP4, getPosition
 
-const libLCIO = joinpath(dirname(@__FILE__), "..", "deps", "lcio_jl.so")
+const libLCIO = joinpath(dirname(@__FILE__), "..", "deps", "lcio_jl")
 
 function __init__()
 	global LCIOReader = ccall((:lcrdrcreate, libLCIO), Ptr{Void}, ())
@@ -166,7 +166,7 @@ function getParticles(rp::Ptr{Void})
 end
 
 include("CaloHit.jl")
-include("MCParticle.jl")
+include("MCparticle.jl")
 
 getRelationFrom(mcp::Ptr{Void}) = ccall((:lcrelgetfrom, libLCIO), Ptr{Void}, (Ptr{Void}, ), mcp)
 getRelationTo(mcp::Ptr{Void}) = ccall((:lcrelgetto, libLCIO), Ptr{Void}, (Ptr{Void}, ), mcp)
