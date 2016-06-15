@@ -9,8 +9,6 @@ function printMCParticle(mcp::Ptr{Void})
     @printf("%-7d%-3d%s\n", id, genStatus, p4)
 end
 
-createMCParticle() = ccall((:lcmcpcreate, libLCIO), Ptr{Void})
-
 setMCPDGid(mcp::Ptr{Void}) = ccall((:lcmcpsetpdg, libLCIO), Cint, (Ptr{Void}, ), mcp)
 
 setMCPMass(mcp::Ptr{Void}) = ccall((:lcmcpsetmass, libLCIO), Cfloat, (Ptr{Void}, ), mcp)
