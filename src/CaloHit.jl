@@ -23,7 +23,5 @@ function getHitMCParticles(hit::Ptr{Void})
 	return particleList
 end
 
-
-getHitType(hit::Ptr{Void}) = ccall((:lccahgettype, libLCIO), Cint, (hit,))
 getSimCaloHit(hit::Ptr{Void}) = ccall((:lcschgetp4, libLCIO), CalHit, (Ptr{Void},), hit)
 getCaloHit(hit::Ptr{Void}) = ccall((:lccahgetp4, libLCIO), CalHit, (Ptr{Void},), hit)
