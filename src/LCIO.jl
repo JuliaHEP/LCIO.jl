@@ -81,7 +81,7 @@ start(it::EventIterator) = C_NULL
 next(it::EventIterator, state) = (it.current, C_NULL)
 function done(it::EventIterator,state)
 	it.current = icxx"$(reader)->readNextEvent();"
-	isdone = icxx"not $(it.current);"
+	isdone = it.current == C_NULL
 	if isdone
 		icxx"$(reader)->close();"
 	end
