@@ -8,12 +8,14 @@ julia:
 notifications:
   email: false
 install:
-  - if [ ! -e lcio-02-07-01/CMakeLists.txt ]; then rm -rf lcio-02-07-01; svn co svn://svn.freehep.org/lcio/tags/v02-07-01 lcio-02-07-01; fi
-  - cd lcio-02-07-01; mkdir -p build; cd build
+  - export LCIOJLBUILDDIR=$(pwd)
+  - if [ ! -e ${HOME}/lcio_bindir/CMakeLists.txt ]; then rm -rf ${HOME}/lcio_bindir; svn co svn://svn.freehep.org/lcio/tags/v02-07-01 ${HOME}/lcio_bindir; fi
+  - cd ${HOME}/lcio_bindir; mkdir -p build; cd build
   - cmake ..
   - make && make install
   - cd ..
   - source ./setup.sh
+  - cd ${LCIOJLBUILDDIR}
 
 # uncomment the following lines to override the default test script
 script:
@@ -22,5 +24,5 @@ script:
   - julia -e 'Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
 cache:
   directories:
-  - lcio-02-07-01
+  - ${HOME}/lcio_bindir
   - ${HOME}/.julia
