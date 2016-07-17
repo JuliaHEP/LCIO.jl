@@ -8,7 +8,7 @@ julia:
 notifications:
   email: false
 install:
-  - if [ ! -d lcio-02-07-01 ]; then svn co svn://svn.freehep.org/lcio/tags/v02-07-01 lcio-02-07-01; fi
+  - if [ ! -e lcio-02-07-01/CMakeLists.txt ]; then rm -rf lcio-02-07-01; svn co svn://svn.freehep.org/lcio/tags/v02-07-01 lcio-02-07-01; fi
   - cd lcio-02-07-01; mkdir -p build; cd build
   - cmake ..
   - make && make install
