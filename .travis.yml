@@ -7,7 +7,19 @@ julia:
   - nightly
 notifications:
   email: false
+install:
+    if [ ! -d lcio-02-07-01 ]; then svn co svn://svn.freehep.org/lcio/tags/v02-07-01 lcio-02-07-01; fi
+    cd lcio; mkdir build; cd build
+    cmake ..
+    make && make install
+    cd ..
+    source ./setup.sh
 # uncomment the following lines to override the default test script
-#script:
-#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
+script:
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - julia -e 'Pkg.clone("https://github.com/Keno/Cxx.jl.git"); Pkg.build("Cxx")'   
+  - julia -e 'Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
+cache:
+  directories:
+  - lcio-02-07-01
+  - ${HOME}/.julia
