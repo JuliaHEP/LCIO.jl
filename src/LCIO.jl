@@ -1,6 +1,6 @@
 module LCIO
 using CxxWrap
 
-wrap_module("liblcio")
+wrap_module("liblciowrap")
 
 end

@@ -1,4 +1,3 @@
-using CxxWrap
 using Compat
 using BinDeps
 
@@ -20,11 +19,7 @@ end
 
 cxx_wrap_dir = Pkg.dir("CxxWrap","deps","usr","lib","cmake")
 
-cxx_wrap_lib = library_dependency("cxx_wrap", aliases=["libcxx_wrap.so.0", "libcxx_wrap.dylib"])
-lcio_lib = library_dependency("lcio", aliases=["liblcio.so", "liblcio.dylib"])
-sio_lib = library_dependency("sio", aliases=["libsio.so", "libsio.dylib"]) 
-lciowrap = library_dependency("lciowrap", aliases=["liblciowrap.so"],
-depends=[lcio_lib, sio_lib, cxx_wrap_lib])
+lciowrap = library_dependency("lciowrap", aliases=["liblciowrap.so"])
 prefix=joinpath(BinDeps.depsdir(lciowrap),"usr")
 lciowrap_srcdir = joinpath(BinDeps.depsdir(lciowrap),"src","lciowrap")
 lciowrap_builddir = joinpath(BinDeps.depsdir(lciowrap),"builds","lciowrap")
@@ -54,8 +49,6 @@ if isdir(lciowrap_builddir)
   end)
 end
 
-provides(Binaries, joinpath(cxx_wrap_dir, ".."), cxx_wrap_lib)
-provides(Binaries, joinpath(ENV["LCIO"], "lib"), [lcio_lib, sio_lib])
 provides(BuildProcess,
   (@build_steps begin
     CreateDirectory(lciowrap_builddir)
