@@ -1,0 +1,28 @@
+# Documentation: http://docs.travis-ci.com/user/languages/julia/
+language: julia
+os:
+  - linux
+  - osx
+julia:
+  - nightly
+notifications:
+  email: false
+install:
+  - export LCIOJLBUILDDIR=$(pwd)
+  - if [ ! -e ${HOME}/lcio_bindir/CMakeLists.txt ]; then rm -rf ${HOME}/lcio_bindir; svn co svn://svn.freehep.org/lcio/tags/v02-07-01 ${HOME}/lcio_bindir; fi
+  - cd ${HOME}/lcio_bindir; mkdir -p build; cd build
+  - cmake ..
+  - make && make install
+  - cd ..
+  - source ./setup.sh
+  - cd ${LCIOJLBUILDDIR}
+
+# uncomment the following lines to override the default test script
+script:
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - julia -e 'Pkg.clone("https://github.com/Keno/Cxx.jl.git"); Pkg.build("Cxx")'   
+  - julia -e 'Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
+cache:
+  directories:
+  - ${HOME}/lcio_bindir
+  - ${HOME}/.julia
