@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.0.0)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_MACOSX_RPATH 1)
 
-list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
 add_definitions(-DJULIA_ENABLE_THREADING)
 
 if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -13,6 +13,9 @@ if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 find_package(CxxWrap)
+
+# this helps Libdl.dlopen find the right paths
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CxxWrap_DIR}/../")
 
 set(LCIO_Dir "${LCIO}")
 find_package(LCIO)
