@@ -70,6 +70,27 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     lciowrap.add_type<EVENT::LCObject>("LCObject");
 
+    lciowrap.add_type<EVENT::SimCalorimeterHit>("SimCalorimeterHit")
+        .method("getEnergy", &EVENT::SimCalorimeterHit::getEnergy);
+
+    lciowrap.add_type<EVENT::SimTrackerHit>("SimTrackerHit");
+
+    lciowrap.add_type<EVENT::CalorimeterHit>("CalorimeterHit");
+
+    lciowrap.add_type<EVENT::TrackerHit>("TrackerHit");
+
+    lciowrap.add_type<EVENT::MCParticle>("MCParticle");
+
+    lciowrap.add_type<EVENT::LCRelation>("LCRelation");
+
+    lciowrap.add_type<EVENT::Vertex>("Vertex");
+
+    lciowrap.add_type<EVENT::Track>("Track");
+
+    lciowrap.add_type<EVENT::LCGenericObject>("LCGenericObject");
+
+    lciowrap.add_type<EVENT::ReconstructedParticle>("ReconstructedParticle");
+
     // most of the functionality is forwarded to the TypedCollection
     lciowrap.add_type<EVENT::LCCollection>("LCCollection")
         .method("getNumberOfElements", &EVENT::LCCollection::getNumberOfElements)
@@ -92,60 +113,38 @@ JULIA_CPP_MODULE_BEGIN(registry)
     lciowrap.method("closeFile", &closeFile);
 
 
-    // lciowrap.add_type<EVENT::SimCalorimeterHit>("SimCalorimeterHit")
-    //     .method("getEnergy", &EVENT::SimCalorimeterHit::getEnergy);
-    //
-    // lciowrap.add_type<EVENT::SimTrackerHit>("SimTrackerHit");
-    //
-    // lciowrap.add_type<EVENT::CalorimeterHit>("CalorimeterHit");
-    //
-    // lciowrap.add_type<EVENT::TrackerHit>("TrackerHit");
-    //
-    // lciowrap.add_type<EVENT::ReconstructedParticle>("ReconstructedParticle");
-    //
-    // lciowrap.add_type<EVENT::MCParticle>("MCParticle");
-    //
-    // lciowrap.add_type<EVENT::LCRelation>("LCRelation");
-    //
-    // lciowrap.add_type<EVENT::Vertex>("Vertex");
-    //
-    // lciowrap.add_type<EVENT::Track>("Track");
-    //
-    // lciowrap.add_type<EVENT::LCGenericObject>("LCGenericObject");
-    //
-    // lciowrap.add_type<Parametric<TypeVar<1>>>("TypedCollection")
-    //     .apply<TypedCollection<EVENT::SimCalorimeterHit>
-    //          , TypedCollection<EVENT::CalorimeterHit>
-    //          , TypedCollection<EVENT::MCParticle>
-    //          , TypedCollection<EVENT::ReconstructedParticle>
-    //          , TypedCollection<EVENT::TrackerHit>
-    //          , TypedCollection<EVENT::SimTrackerHit>
-    //          , TypedCollection<EVENT::LCRelation>
-    //          , TypedCollection<EVENT::LCGenericObject>
-    //          , TypedCollection<EVENT::Track>
-    //          , TypedCollection<EVENT::Vertex>>([](auto wrapped)
-    //     {
-    //     typedef typename decltype(wrapped)::type WrappedT;
-    //     wrapped.template constructor<EVENT::LCCollection*>();
-    //     wrapped.method("getElementAt", &WrappedT::getElementAt);
-    //     wrapped.method("getNumberOfElements", &WrappedT::getNumberOfElements);
-    // });
-    //
-    //
-    // lciowrap.add_type<UTIL::BitField64>("BitField64")
-    //     .constructor<const string&>()
-    //     .method("getValue", &UTIL::BitField64::getValue);
-    //
-    // lciowrap.add_type<Parametric<TypeVar<1>>>("CellIDDecoder")
-    //     .apply<UTIL::CellIDDecoder<EVENT::SimCalorimeterHit>
-    //          , UTIL::CellIDDecoder<EVENT::CalorimeterHit>
-    //          , UTIL::CellIDDecoder<EVENT::TrackerHit>
-    //          , UTIL::CellIDDecoder<EVENT::SimTrackerHit>>([](auto wrapped)
-    // {
-    //     typedef typename decltype(wrapped)::type WrappedT;
-    //     wrapped.template constructor<const string&>();
-    //     wrapped.template constructor<const EVENT::LCCollection*>();
-    //     wrapped.method("get", &WrappedT::operator());
-    // });
+    lciowrap.add_type<Parametric<TypeVar<1>>>("TypedCollection")
+        .apply<TypedCollection<EVENT::SimCalorimeterHit>
+             , TypedCollection<EVENT::CalorimeterHit>
+             , TypedCollection<EVENT::MCParticle>
+             , TypedCollection<EVENT::ReconstructedParticle>
+             , TypedCollection<EVENT::TrackerHit>
+             , TypedCollection<EVENT::SimTrackerHit>
+             , TypedCollection<EVENT::LCRelation>
+             , TypedCollection<EVENT::LCGenericObject>
+             , TypedCollection<EVENT::Track>
+             , TypedCollection<EVENT::Vertex>>([](auto wrapped)
+        {
+        typedef typename decltype(wrapped)::type WrappedColl;
+        wrapped.template constructor<EVENT::LCCollection*>();
+        wrapped.method("getElementAt", &WrappedColl::getElementAt);
+        wrapped.method("getNumberOfElements", &WrappedColl::getNumberOfElements);
+    });
+
+    lciowrap.add_type<UTIL::BitField64>("BitField64")
+        .constructor<const string&>()
+        .method("getValue", &UTIL::BitField64::getValue);
+
+    lciowrap.add_type<Parametric<TypeVar<1>>>("CellIDDecoder")
+        .apply<UTIL::CellIDDecoder<EVENT::SimCalorimeterHit>
+             , UTIL::CellIDDecoder<EVENT::CalorimeterHit>
+             , UTIL::CellIDDecoder<EVENT::TrackerHit>
+             , UTIL::CellIDDecoder<EVENT::SimTrackerHit>>([](auto wrapped)
+    {
+        typedef typename decltype(wrapped)::type WrappedT;
+        // wrapped.template constructor<const EVENT::LCCollection*>();
+        wrapped.template constructor<const string&>();
+        // wrapped.method("get", &WrappedT::operator());
+    });
 
 JULIA_CPP_MODULE_END
