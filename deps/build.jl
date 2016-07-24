@@ -60,9 +60,7 @@ provides(BuildProcess,
 
 deps = [lciowrap]
 
-provides(Binaries, Dict(URI("https://github.com/jstrube/LCIO.jl/releases/download/v0.3.0/LCIO-julia-$(VERSION.major).$(VERSION.minor)-win$(WORD_SIZE).zip") => deps), os = :Windows)
-
-@BinDeps.install Dict([(:lciowrap, :_l_lcio_wrap)])
+@BinDeps.install Dict([(:lciowrap, :_l_lciowrap)])
 
 @static if is_windows()
   if haskey(ENV, "BUILD_ON_WINDOWS") && ENV["BUILD_ON_WINDOWS"] == "1"

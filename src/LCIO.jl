@@ -1,8 +1,15 @@
 module LCIO
 using CxxWrap
 import Base: getindex, start, done, next, length, +
+export Vec, getCollection, getCollectionNames, getCollectionTypeName, getP4, getPosition
 
-wrap_module("liblciowrap")
+const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
+if !isfile(depsfile)
+  error("$depsfile not found, CxxWrap did not build properly")
+end
+include(depsfile)
+
+wrap_module(_l_lciowrap)
 
 function __init__()
     global reader = createLCReader()
@@ -11,8 +18,6 @@ function __init__()
         #deletLCReader(reader)
     end
 end
-
-export Vec, getCollection, getCollectionNames, getCollectionTypeName, getP4, getPosition
 
 immutable Vec
 	x::Cdouble
@@ -51,32 +56,34 @@ end
 # Returning current and reading nextEvent as the new state causes memory corruption
 
 type EventIterator
-	current::LCEvent
+    nEvents
 end
-start(it::EventIterator) = C_NULL
-next(it::EventIterator, state) = (it.current, C_NULL)
+start(it::EventIterator) = 0
+function next(it::EventIterator, state)
+    it.nEvents -= 1
+    (readNextEvent(reader), it.nEvents-1)
+end
 function done(it::EventIterator, state)
-	it.current = readNextEvent(reader)
-	isdone = it.current == C_NULL
+	isdone = 0 == it.nEvents
 	if isdone
-		close(reader)
+		closeFile(reader)
 	end
 	isdone
 end
 
 # open file with reader, returns iterator
 function open(fn::AbstractString)
-	open(reader, fn)
+	openFile(reader, fn)
 	# returns an iterator, initialized with a nullptr
 	# the iterator knows about the global reader object
-	return EventIterator( nothing )
+	return EventIterator(getNumberOfEvents(reader))
 end
 
 # We would like to have a typed collection, but what getCollection returns is unfortunately untyped
 # The type is established by reading its name from the collection and mapping it in the LCIOTypemap
-immutable LCCollection{T}
-	coll::LCCollection
-end
+# immutable LCCollection{T}
+# 	coll::LCCollection
+# end
 
 # typealias SimCalorimeterHit cxxt"EVENT::SimCalorimeterHit*"
 # typealias TrackerHit cxxt"EVENT::TrackerHit*"
@@ -87,22 +94,22 @@ end
 #
 
 # map from names stored in collection to actual types
-LCIOTypemap = Dict(
-	"SimCalorimeterHit" => SimCalorimeterHit,
-	"TrackerHit" => TrackerHit,
-	"SimTrackerHit" => SimTrackerHit,
-	"MCParticle" => MCParticle,
-	"Track" => Track,
-	"LCGenericObject" => LCGenericObject,
-)
-
-start(it::LCCollection) = 0
-done(it::LCCollection, i) = i >= length(it)
-next{T}(it::LCCollection{T}, i) = getElementAt{T}(it.coll, i), i+1
-length(it::LCCollection) = getNumberOfElements(it.coll)
-
+# LCIOTypemap = Dict(
+# 	"SimCalorimeterHit" => SimCalorimeterHit,
+# 	"TrackerHit" => TrackerHit,
+# 	"SimTrackerHit" => SimTrackerHit,
+# 	"MCParticle" => MCParticle,
+# 	"Track" => Track,
+# 	"LCGenericObject" => LCGenericObject,
+# )
+#
+# start(it::LCCollection) = 0
+# done(it::LCCollection, i) = i >= length(it)
+# next{T}(it::LCCollection{T}, i) = getElementAt{T}(it.coll, i), i+1
+# length(it::LCCollection) = getNumberOfElements(it.coll)
+#
 function getCollection(event, collectionName)
-	collection = getCollection(event, collectionName)
+	collection = getEventCollection(event, collectionName)
 	collectionType = getTypeName(collection)
 	return TypedCollection{LCIOTypemap[String(collectionType)]}(collection)
 end
