@@ -19,7 +19,7 @@ end
 
 cxx_wrap_dir = Pkg.dir("CxxWrap","deps","usr","lib","cmake")
 
-lciowrap = library_dependency("lciowrap", aliases=["liblciowrap.so"])
+lciowrap = library_dependency("liblciowrap")
 prefix=joinpath(BinDeps.depsdir(lciowrap),"usr")
 lciowrap_srcdir = joinpath(BinDeps.depsdir(lciowrap),"src","lciowrap")
 lciowrap_builddir = joinpath(BinDeps.depsdir(lciowrap),"builds","lciowrap")
