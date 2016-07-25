@@ -2,7 +2,7 @@ project(lciowrapper)
 
 cmake_minimum_required(VERSION 3.0.0)
 
-set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_MACOSX_RPATH 0)
 
 list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
 add_definitions(-DJULIA_ENABLE_THREADING)

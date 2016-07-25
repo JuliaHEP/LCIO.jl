@@ -144,7 +144,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         typedef typename decltype(wrapped)::type WrappedT;
         // wrapped.template constructor<const EVENT::LCCollection*>();
         wrapped.template constructor<const string&>();
-        // wrapped.method("get", &WrappedT::operator());
+        wrapped.method("get", &WrappedT::operator());
     });
 
 JULIA_CPP_MODULE_END
