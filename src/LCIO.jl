@@ -1,3 +1,4 @@
+__precompile__(false)
 module LCIO
 using CxxWrap
 import Base: getindex, start, done, next, length, +
@@ -94,24 +95,25 @@ end
 #
 
 # map from names stored in collection to actual types
-# LCIOTypemap = Dict(
-# 	"SimCalorimeterHit" => SimCalorimeterHit,
-# 	"TrackerHit" => TrackerHit,
-# 	"SimTrackerHit" => SimTrackerHit,
-# 	"MCParticle" => MCParticle,
-# 	"Track" => Track,
-# 	"LCGenericObject" => LCGenericObject,
-# )
-#
-# start(it::LCCollection) = 0
-# done(it::LCCollection, i) = i >= length(it)
-# next{T}(it::LCCollection{T}, i) = getElementAt{T}(it.coll, i), i+1
-# length(it::LCCollection) = getNumberOfElements(it.coll)
-#
+LCIOTypemap = Dict(
+	"SimCalorimeterHit" => SimCalorimeterHit,
+    "CalorimeterHit" => CalorimeterHit,
+	"TrackerHit" => TrackerHit,
+	"SimTrackerHit" => SimTrackerHit,
+	"MCParticle" => MCParticle,
+	"Track" => Track,
+	"LCGenericObject" => LCGenericObject,
+)
+
+start(it::TypedCollection) = convert(UInt64, length(it))
+done(it::TypedCollection, i) = i <= 0
+next{T}(it::TypedCollection{T}, i) = getElementAt(it, i-1), i-1
+length(it::TypedCollection) = getNumberOfElements(it)
+
 function getCollection(event, collectionName)
 	collection = getEventCollection(event, collectionName)
 	collectionType = getTypeName(collection)
-	return TypedCollection{LCIOTypemap[String(collectionType)]}(collection)
+	return TypedCollection{LCIOTypemap[collectionType]}(collection)
 end
 
 # getEnergy(particle) = icxx"$(particle)->getEnergy();"
@@ -119,10 +121,11 @@ end
 # 	p3 = icxx"$(particle)->getMomentum();"
 # 	ThreeVec(unsafe_load(p3, 1), unsafe_load(p3, 2), unsafe_load(p3, 3))
 # end
-# function getPosition(hit)
-# 	pos = icxx"$(hit)->getPosition();"
-# 	ThreeVec(unsafe_load(pos, 1), unsafe_load(pos, 2), unsafe_load(pos, 3))
-# end
+function getPosition(hit)
+    p3 = Array{Float64,1}(3)
+    getP3(hit, p3)
+    return p3
+end
 #
 # function getP4(particle)
 # 	p3 = icxx"$(particle)->getMomentum();"

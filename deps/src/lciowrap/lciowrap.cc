@@ -1,6 +1,7 @@
 #include <cxx_wrap.hpp>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "IO/LCReader.h"
 #include "IOIMPL/LCFactory.h"
@@ -52,10 +53,10 @@ closeFile(IO::LCReader* reader) {
 template<typename T>
 struct TypedCollection
 {
+    EVENT::LCCollection* m_coll;
     TypedCollection(EVENT::LCCollection* collection) {
         m_coll = collection;
     }
-    EVENT::LCCollection* m_coll;
     inline T* getElementAt(size_t i) {
         return static_cast<T*>(m_coll->getElementAt(i));
     }
@@ -72,6 +73,12 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     lciowrap.add_type<EVENT::SimCalorimeterHit>("SimCalorimeterHit")
         .method("getEnergy", &EVENT::SimCalorimeterHit::getEnergy);
+    lciowrap.method("getP3", [](EVENT::SimCalorimeterHit* hit, ArrayRef<double> x) {
+            const float* p = hit->getPosition();
+            x[0] = p[0];
+            x[1] = p[1];
+            x[2] = p[2];
+        });
 
     lciowrap.add_type<EVENT::SimTrackerHit>("SimTrackerHit");
 
@@ -94,8 +101,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
     // most of the functionality is forwarded to the TypedCollection
     lciowrap.add_type<EVENT::LCCollection>("LCCollection")
         .method("getNumberOfElements", &EVENT::LCCollection::getNumberOfElements)
-        .method("getElementAt", &EVENT::LCCollection::getElementAt)
-        .method("getTypeName", &EVENT::LCCollection::getTypeName);
+        .method("getElementAt", &EVENT::LCCollection::getElementAt);
+    // FIXME This is a workaround for a bug that prevents const string& return types
+    lciowrap.method("getTypeName", [](EVENT::LCCollection* c){
+        return string(c->getTypeName());
+    });
 
     lciowrap.add_type<EVENT::LCEvent>("LCEvent")
         .method("getEventCollection", &EVENT::LCEvent::getCollection);
@@ -142,8 +152,8 @@ JULIA_CPP_MODULE_BEGIN(registry)
              , UTIL::CellIDDecoder<EVENT::SimTrackerHit>>([](auto wrapped)
     {
         typedef typename decltype(wrapped)::type WrappedT;
-        // wrapped.template constructor<const EVENT::LCCollection*>();
-        wrapped.template constructor<const string&>();
+        wrapped.template constructor<const EVENT::LCCollection*>();
+        // wrapped.template constructor<const string&>();
         wrapped.method("get", &WrappedT::operator());
     });
 

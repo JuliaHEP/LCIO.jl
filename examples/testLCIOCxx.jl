@@ -9,9 +9,9 @@ function testReader(fn::AbstractString)
 		# for item in getCollection(event, "MCParticle")
 		# 	println(getP4(item))
 		# end
-		# for item in getCollection(event, "EcalBarrHits")
-		# 	println(getPosition(item))
-		# end
+		for item in getCollection(event, "EcalBarrHits")
+			println(getPosition(item))
+		end
 	end
 end
 testReader(ARGS[1])
