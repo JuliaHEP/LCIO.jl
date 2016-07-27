@@ -63,6 +63,10 @@ struct TypedCollection
     inline size_t getNumberOfElements() {
         return m_coll->getNumberOfElements();
     }
+    inline EVENT::LCCollection*
+    coll() {
+        return m_coll;
+    }
 };
 
 JULIA_CPP_MODULE_BEGIN(registry)
@@ -139,6 +143,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         wrapped.template constructor<EVENT::LCCollection*>();
         wrapped.method("getElementAt", &WrappedColl::getElementAt);
         wrapped.method("getNumberOfElements", &WrappedColl::getNumberOfElements);
+        wrapped.method("coll", &WrappedColl::coll);
     });
 
     lciowrap.add_type<UTIL::BitField64>("BitField64")

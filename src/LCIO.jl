@@ -1,7 +1,7 @@
 __precompile__(false)
 module LCIO
 using CxxWrap
-import Base: getindex, start, done, next, length, +
+import Base: getindex, start, done, next, length, +, convert
 export Vec, getCollection, getCollectionNames, getCollectionTypeName, getP4, getPosition
 
 const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
@@ -16,7 +16,7 @@ function __init__()
     global reader = createLCReader()
     atexit() do
         # CxxWrap'ed objects automatically call delete in the finalizer
-        #deletLCReader(reader)
+        # deletLCReader(reader)
     end
 end
 
@@ -42,8 +42,6 @@ immutable CalHit
 	E::Cfloat
 end
 
-# typealias VectorStringP cxxt"const std::vector<std::string>*"
-#
 # start(it::VectorStringP) = 0
 # next(it::VectorStringP,i) = (it[i], i+1)
 # done(it::VectorStringP,i) = i >= length(it)
@@ -75,24 +73,10 @@ end
 # open file with reader, returns iterator
 function open(fn::AbstractString)
 	openFile(reader, fn)
-	# returns an iterator, initialized with a nullptr
+	# returns an iterator
 	# the iterator knows about the global reader object
 	return EventIterator(getNumberOfEvents(reader))
 end
-
-# We would like to have a typed collection, but what getCollection returns is unfortunately untyped
-# The type is established by reading its name from the collection and mapping it in the LCIOTypemap
-# immutable LCCollection{T}
-# 	coll::LCCollection
-# end
-
-# typealias SimCalorimeterHit cxxt"EVENT::SimCalorimeterHit*"
-# typealias TrackerHit cxxt"EVENT::TrackerHit*"
-# typealias SimTrackerHit cxxt"EVENT::SimTrackerHit*"
-# typealias MCParticle cxxt"EVENT::MCParticle*"
-# typealias Track cxxt"EVENT::Track*"
-# typealias LCGenericObject cxxt"EVENT::LCGenericObject*"
-#
 
 # map from names stored in collection to actual types
 LCIOTypemap = Dict(
@@ -105,63 +89,25 @@ LCIOTypemap = Dict(
 	"LCGenericObject" => LCGenericObject,
 )
 
-start(it::TypedCollection) = convert(UInt64, length(it))
+start(it::TypedCollection) = length(it)
 done(it::TypedCollection, i) = i <= 0
 next{T}(it::TypedCollection{T}, i) = getElementAt(it, i-1), i-1
 length(it::TypedCollection) = getNumberOfElements(it)
 
+CellIDDecoder{T}(t::TypedCollection{T}) = CellIDDecoder{T}(coll(t))
+
+# to get the typed collection, one needs to read the typename
+# then we can return the right type from the LCIOTypemap
 function getCollection(event, collectionName)
 	collection = getEventCollection(event, collectionName)
 	collectionType = getTypeName(collection)
 	return TypedCollection{LCIOTypemap[collectionType]}(collection)
 end
 
-# getEnergy(particle) = icxx"$(particle)->getEnergy();"
-# function getMomentum(particle)
-# 	p3 = icxx"$(particle)->getMomentum();"
-# 	ThreeVec(unsafe_load(p3, 1), unsafe_load(p3, 2), unsafe_load(p3, 3))
-# end
 function getPosition(hit)
     p3 = Array{Float64,1}(3)
     getP3(hit, p3)
     return p3
 end
-#
-# function getP4(particle)
-# 	p3 = icxx"$(particle)->getMomentum();"
-# 	e = icxx"$(particle)->getEnergy();"
-# 	Vec(unsafe_load(p3, 1), unsafe_load(p3, 2), unsafe_load(p3, 3), e)
-# end
-
-
-# include("MCParticle.jl")
-# include("CaloHit.jl")
-
-# getRelationFrom(mcp::Ptr{Void}) = ccall((:lcrelgetfrom, libLCIO), Ptr{Void}, (Ptr{Void}, ), mcp)
-# getRelationTo(mcp::Ptr{Void}) = ccall((:lcrelgetto, libLCIO), Ptr{Void}, (Ptr{Void}, ), mcp)
-
-
-# getPositionVec(hit::Ptr{Void}) = ccall((:lcsthgetposition, libLCIO), ThreeVec, (Ptr{Void}, ), hit)
-#
-# function getPosition(hit::Ptr{Void})
-# 	pos = ccall((:lcsthgetposition, libLCIO), Ptr{Cdouble}, (Ptr{Void},), hit)
-# 	return [unsafe_load(pos, 1) unsafe_load(pos, 2) unsafe_load(pos, 3)]
-# end
-#
-#
-# function getParticleHits(rp::Ptr{Void})
-# 	hitList = CalHit[]
-# 	nClusters = Ref{Csize_t}(0)
-# 	cList = ccall((:lcrcpgetclusters, libLCIO), Ptr{Ptr{Void}}, (Ptr{Void}, Ref{Csize_t}), rp, nClusters)
-# 	for i in 1:nClusters[]
-# 		nHits = Ref{Csize_t}(0)
-# 		hitCollection = ccall((:lcclugetcalorimeterhits, libLCIO), Ptr{Ptr{Void}}, (Ptr{Void}, Ref{Csize_t}), unsafe_load(cList, i), nHits)
-# 		for j in 1:nHits[]
-# 			push!(hitList, getCaloHit(unsafe_load(hitCollection, j)))
-# 		end
-# 	end
-# 	return hitList
-# end
-
 
 end

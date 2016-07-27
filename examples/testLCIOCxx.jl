@@ -9,9 +9,11 @@ function testReader(fn::AbstractString)
 		# for item in getCollection(event, "MCParticle")
 		# 	println(getP4(item))
 		# end
-		for item in getCollection(event, "EcalBarrHits")
+		x = getCollection(event, "EcalBarrHits")
+		for item in x
 			println(getPosition(item))
 		end
+		println(LCIO.CellIDDecoder(x))
 	end
 end
 testReader(ARGS[1])

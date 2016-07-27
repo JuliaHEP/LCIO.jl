@@ -16,10 +16,6 @@ function getTimeList(hit)
 	return timeList
 end
 
-<<<<<<< HEAD
-getSimCaloHit(hit::Ptr{Void}) = ccall((:lcschgetp4, libLCIO), CalHit, (Ptr{Void},), hit)
-getCaloHit(hit::Ptr{Void}) = ccall((:lccahgetp4, libLCIO), CalHit, (Ptr{Void},), hit)
-=======
 function getPDGList(hit)
 	nParticles = icxx"$(hit)->getNMCParticles();"
 	PDGList = Float64[]
@@ -28,4 +24,3 @@ function getPDGList(hit)
 	end
 	return PDGList
 end
->>>>>>> Cxx
