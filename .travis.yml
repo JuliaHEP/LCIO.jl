@@ -20,8 +20,8 @@ install:
 # uncomment the following lines to override the default test script
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'Pkg.clone("https://github.com/Keno/Cxx.jl.git"); Pkg.build("Cxx")'   
-  - julia -e 'Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
+  - julia -e '"Cxx" in Pkg.installed() ? Pkg.checkout("Cxx") : Pkg.clone("https://github.com/Keno/Cxx.jl.git"); Pkg.build("Cxx")'   
+  - julia -e 'Pkg.rm("LCIO"); Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
 cache:
   directories:
   - ${HOME}/lcio_bindir
