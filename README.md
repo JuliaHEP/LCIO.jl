@@ -1,5 +1,6 @@
 LCIO bindings for Julia
 =======================
+[![Build Status](https://travis-ci.org/jstrube/LCIO.jl.svg?branch=master)](https://travis-ci.org/jstrube/LCIO.jl)
 
 Prerequisites
 -------------
