@@ -1,5 +1,7 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
+sudo: required
+dist: trusty
 os:
   - linux
   - osx
@@ -21,7 +23,6 @@ install:
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
-  - julia -e 'Pkg.installed("Cxx") == nothing && Pkg.clone("https://github.com/Keno/Cxx.jl.git"); Pkg.checkout("Cxx"); Pkg.build("Cxx")'   
   - julia -e 'Pkg.installed("CxxWrap") == nothing && Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap"); Pkg.build("CxxWrap");'
   - julia -e 'Pkg.rm("LCIO"); Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
 cache:
