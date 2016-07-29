@@ -4,16 +4,26 @@ os:
   - linux
 sudo: required
 dist: trusty
-addons:
-  apt:
-    sources:
-    # add PPAs with more up-to-date toolchains
-    - ubuntu-toolchain-r-test
-    packages:
-    # install toolchains
-    - gcc-6
-    - g++-6
-env: COMPILER=g++-6 CXX=g++-6 CC=gcc-6
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+            - gcc-6
+      env: MYCXX=g++-6 MYCC=gcc-6
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+      env: MYCXX=clang++-3.8
 julia:
   - nightly
 notifications:
@@ -22,14 +32,16 @@ install:
   - export LCIOJLBUILDDIR=$(pwd)
   - if [ ! -e ${HOME}/lcio_bindir/CMakeLists.txt ]; then rm -rf ${HOME}/lcio_bindir; svn co svn://svn.freehep.org/lcio/tags/v02-07-01 ${HOME}/lcio_bindir; fi
   - cd ${HOME}/lcio_bindir; mkdir -p build; cd build
-  - cmake ..
-  - make && make install
+  - CXX=${MYCXX} CC=${MYCC} cmake ..
+  - CXX=${MYCXX} CC=${MYCC} make && make install
   - cd ..
   - source ./setup.sh
   - cd ${LCIOJLBUILDDIR}
 
 # uncomment the following lines to override the default test script
 script:
+  - export CXX=${MYCXX}
+  - export CC=${MYCC}
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
   - julia -e 'Pkg.installed("CxxWrap") == nothing && Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap"); Pkg.build("CxxWrap");'
