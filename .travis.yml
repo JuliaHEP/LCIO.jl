@@ -4,28 +4,17 @@ os:
   - linux
 sudo: required
 dist: trusty
-matrix:
-  include:
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-            - gcc-6
-      env: MYCXX=g++-6 MYCC=gcc-6
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-          packages:
-            - clang-3.8
-      env: MYCXX=clang++-3.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-6
+      - gcc-6
+env: MYCXX=g++-6 MYCC=gcc-6
 julia:
   - nightly
+  - 0.4
 notifications:
   email: false
 install:
