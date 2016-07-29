@@ -16,7 +16,7 @@ set(LCIO_DIR "${LCIO}")
 find_package(LCIO)
 
 # this helps Libdl.dlopen find the right paths
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CxxWrap_DIR}/../;${LCIO_LIBRARY_DIRS}/lib")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CxxWrap_DIR}/../;${LCIO_LIBRARY_DIRS}")
 
 include_directories(${LCIO_INCLUDE_DIRS})
 
