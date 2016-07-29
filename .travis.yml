@@ -13,7 +13,7 @@ addons:
     # install toolchains
     - gcc-6
     - g++-6
-env: COMPILER=g++-6
+env: COMPILER=g++-6 CXX=g++-6 CC=gcc-6
 julia:
   - nightly
 notifications:
