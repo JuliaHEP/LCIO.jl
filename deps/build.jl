@@ -19,10 +19,10 @@ end
 
 cxx_wrap_dir = Pkg.dir("CxxWrap","deps","usr","lib","cmake")
 
-lciowrap = library_dependency("liblciowrap")
-prefix=joinpath(BinDeps.depsdir(lciowrap),"usr")
-lciowrap_srcdir = joinpath(BinDeps.depsdir(lciowrap),"src","lciowrap")
-lciowrap_builddir = joinpath(BinDeps.depsdir(lciowrap),"builds","lciowrap")
+liblciowrap = library_dependency("liblciowrap")
+prefix=joinpath(BinDeps.depsdir(liblciowrap),"usr")
+lciowrap_srcdir = joinpath(BinDeps.depsdir(liblciowrap),"src","lciowrap")
+lciowrap_builddir = joinpath(BinDeps.depsdir(liblciowrap),"builds","lciowrap")
 lib_prefix = @windows ? "" : "lib"
 lib_suffix = @windows? "dll" : (@osx? "dylib" : "so")
 
@@ -56,11 +56,11 @@ provides(BuildProcess,
       ChangeDirectory(lciowrap_builddir)
       FileRule(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix"),lcio_steps)
     end
-  end),lciowrap)
+  end),liblciowrap)
 
-deps = [lciowrap]
+deps = [liblciowrap]
 
-@BinDeps.install Dict([(:lciowrap, :_l_lciowrap)])
+@BinDeps.install Dict([(:liblciowrap, :_l_lciowrap)])
 
 @static if is_windows()
   if haskey(ENV, "BUILD_ON_WINDOWS") && ENV["BUILD_ON_WINDOWS"] == "1"
