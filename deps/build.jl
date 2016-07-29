@@ -60,7 +60,7 @@ provides(BuildProcess,
 
 deps = [lciowrap]
 
-@BinDeps.install Dict([(:liblciowrap, :_l_lciowrap)])
+@BinDeps.install Dict([(:lciowrap, :_l_lciowrap)])
 
 @static if is_windows()
   if haskey(ENV, "BUILD_ON_WINDOWS") && ENV["BUILD_ON_WINDOWS"] == "1"
