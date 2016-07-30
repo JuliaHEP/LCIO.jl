@@ -114,7 +114,10 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     lciowrap.add_type<EVENT::LCEvent>("LCEvent")
         .method("getEventCollection", &EVENT::LCEvent::getCollection)
-        .method("getCollectionNames", &EVENT::LCEvent::getCollectionNames);
+        .method("getCollectionNames", &EVENT::LCEvent::getCollectionNames)
+        .method("getDetectorName", &EVENT::LCEvent::getDetectorName)
+        .method("getEventNumber", &EVENT::LCEvent::getEventNumber)
+        .method("getRunNumber", &EVENT::LCEvent::getRunNumber);
     //
     lciowrap.add_type<IO::LCReader>("LCReader")
       .method("getNumberOfEvents", &IO::LCReader::getNumberOfEvents);

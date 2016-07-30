@@ -2,7 +2,9 @@ __precompile__(false)
 module LCIO
 using CxxWrap
 import Base: getindex, start, done, next, length, +, convert
-export Vec, getCollection, getCollectionNames, getCollectionTypeName, getP4, getPosition
+export Vec, getP4, getPosition,
+    getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
+    getTypeName # LCCollection
 
 const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
 if !isfile(depsfile)
@@ -42,14 +44,10 @@ immutable CalHit
 	E::Cfloat
 end
 
-# the iterator iterates over the stringvec
-# in reverse order!
-# in general, this should be a string set anyway, so
-# this doesn't really matter
 # uses Julia counting, 1..n
-start(it::StringVec) = length(it)
-next(it::StringVec, i) = (it[i], i-1)
-done(it::StringVec, i) = i <= 0 
+start(it::StringVec) = convert(UInt64, 1)
+next(it::StringVec, i) = (it[i], i+1)
+done(it::StringVec, i) = i > length(it)
 length(it::StringVec) = size(it)
 # 'at' uses C counting, 0..n-1
 getindex(it::StringVec, i) = at(it, i-1)
@@ -97,6 +95,8 @@ next{T}(it::TypedCollection{T}, i) = getElementAt(it, i-1), i-1
 length(it::TypedCollection) = getNumberOfElements(it)
 
 CellIDDecoder{T}(t::TypedCollection{T}) = CellIDDecoder{T}(coll(t))
+
+getTypeName{T}(coll::TypedCollection{T}) = "$T"
 
 # to get the typed collection, one needs to read the typename
 # then we can return the right type from the LCIOTypemap
