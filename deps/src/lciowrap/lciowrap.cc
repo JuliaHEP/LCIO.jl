@@ -81,11 +81,14 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     lciowrap.add_type<EVENT::SimCalorimeterHit>("SimCalorimeterHit")
         .method("getEnergy", &EVENT::SimCalorimeterHit::getEnergy);
-    lciowrap.method("getP3", [](EVENT::SimCalorimeterHit* hit, ArrayRef<double> x) {
+    // returns a bool to indicate whether this was a nullptr
+    lciowrap.method("getP3", [](const EVENT::SimCalorimeterHit* hit, ArrayRef<double> x)->bool {
             const float* p = hit->getPosition();
+            if (not p) {return false;}
             x[0] = p[0];
             x[1] = p[1];
             x[2] = p[2];
+            return true;
         });
 
     lciowrap.add_type<EVENT::SimTrackerHit>("SimTrackerHit");
@@ -94,7 +97,71 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     lciowrap.add_type<EVENT::TrackerHit>("TrackerHit");
 
-    lciowrap.add_type<EVENT::MCParticle>("MCParticle");
+    lciowrap.add_type<EVENT::MCParticle>("MCParticle")
+        .method("getEnergy", &EVENT::MCParticle::getEnergy)
+        .method("getPDG", &EVENT::MCParticle::getPDG)
+        .method("getGeneratorStatus", &EVENT::MCParticle::getGeneratorStatus)
+        .method("getSimulatorStatus", &EVENT::MCParticle::getSimulatorStatus)
+        .method("isCreatedInSimulation", &EVENT::MCParticle::isCreatedInSimulation)
+        .method("isBackscatter", &EVENT::MCParticle::isBackscatter)
+        .method("vertexIsNotEndpointOfParent", &EVENT::MCParticle::vertexIsNotEndpointOfParent)
+        .method("isDecayedInTracker", &EVENT::MCParticle::isDecayedInTracker)
+        .method("isDecayedInCalorimeter", &EVENT::MCParticle::isDecayedInCalorimeter)
+        .method("hasLeftDetector", &EVENT::MCParticle::hasLeftDetector)
+        .method("isStopped", &EVENT::MCParticle::isStopped)
+        .method("isOverlay", &EVENT::MCParticle::isOverlay)
+        .method("getTime", &EVENT::MCParticle::getTime)
+        .method("getMass", &EVENT::MCParticle::getMass)
+        .method("getCharge", &EVENT::MCParticle::getCharge);
+
+    lciowrap.add_type<EVENT::MCParticleVec>("MCParticleVec")
+        .method("size", &EVENT::MCParticleVec::size);
+    lciowrap.method("at", [](const EVENT::MCParticleVec& vec, size_t i) {
+            return vec.at(i);
+    });
+
+    lciowrap.method("getParents", [](const EVENT::MCParticle* p)->const EVENT::MCParticleVec& {
+        return p->getParents();
+    });
+    lciowrap.method("getDaughters", [](const EVENT::MCParticle* p)->const EVENT::MCParticleVec& {
+        return p->getDaughters();
+    });
+    // returns a bool to indicate whether this was a nullptr
+    lciowrap.method("getVertex3", [](const EVENT::MCParticle* p, ArrayRef<double> v)->bool {
+        const double* vtx = p->getVertex();
+        if (not vtx) {return false;}
+        v[0] = vtx[0];
+        v[1] = vtx[1];
+        v[2] = vtx[2];
+        return true;
+    });
+    // returns a bool to indicate whether this was a nullptr
+    lciowrap.method("getEndpoint3", [](const EVENT::MCParticle* p, ArrayRef<double> pos)->bool {
+        const double* endp = p->getEndpoint();
+        if (not endp) {return false;}
+        pos[0] = endp[0];
+        pos[1] = endp[1];
+        pos[2] = endp[2];
+        return true;
+    });
+    // returns a bool to indicate whether this was a nullptr
+    lciowrap.method("getMomentum3", [](const EVENT::MCParticle* p, ArrayRef<double> p3)->bool {
+        const double* mom = p->getMomentum();
+        if (not mom) {return false;}
+        p3[0] = mom[0];
+        p3[1] = mom[1];
+        p3[2] = mom[2];
+        return true;
+    });
+    // returns a bool to indicate whether this was a nullptr
+    lciowrap.method("getMomentumAtEndpoint3", [](const EVENT::MCParticle* p, ArrayRef<double> p3)->bool {
+        const double* mom = p->getMomentumAtEndpoint();
+        if (not mom) {return false;}
+        p3[0] = mom[0];
+        p3[1] = mom[1];
+        p3[2] = mom[2];
+        return true;
+    });
 
     lciowrap.add_type<EVENT::LCRelation>("LCRelation");
 

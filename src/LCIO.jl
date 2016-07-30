@@ -4,8 +4,12 @@ using CxxWrap
 import Base: getindex, start, done, next, length, +, convert
 export Vec, getP4, getPosition,
     getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
-    getTypeName # LCCollection
-
+    getTypeName, # LCCollection
+    getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, # MCParticle
+    isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, # MCParticle
+    hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, # MCParticle
+    getMomentumAtEndpoint, getMass, getCharge # MCParticle
+    
 const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
 if !isfile(depsfile)
   error("$depsfile not found, CxxWrap did not build properly")
@@ -108,8 +112,32 @@ end
 
 function getPosition(hit)
     p3 = Array{Float64,1}(3)
-    getP3(hit, p3)
-    return p3
+    valid = getP3(hit, p3)
+    return valid, p3
+end
+
+function getMomentum(particle)
+    p3 = Array{Float64,1}(3)
+    valid = getMomentum3(particle, p3)
+    return valid, p3
+end
+
+function getVertex(particle)
+    p3 = Array{Float64,1}(3)
+    valid = getVertex3(particle, p3)
+    return valid, p3
+end
+
+function getEndpoint(particle)
+    p3 = Array{Float64,1}(3)
+    valid = getEndpoint3(particle, p3)
+    return valid, p3
+end
+
+function getMomentumAtEndpoint(particle)
+    p3 = Array{Float64,1}(3)
+    valid = getMomentumAtEndpoint3(particle, p3)
+    return valid, p3
 end
 
 end
