@@ -71,7 +71,11 @@ struct TypedCollection
 
 JULIA_CPP_MODULE_BEGIN(registry)
     cxx_wrap::Module& lciowrap = registry.create_module("LCIO");
-    lciowrap.add_type<std::vector<std::string>>("StringVector");
+    lciowrap.add_type<vector<string>>("StringVec")
+        .method("size", &EVENT::StringVec::size);
+    lciowrap.method("at", [](const vector<string>* vec, size_t i) {
+        return vec->at(i);
+    });
 
     lciowrap.add_type<EVENT::LCObject>("LCObject");
 
@@ -105,15 +109,12 @@ JULIA_CPP_MODULE_BEGIN(registry)
     // most of the functionality is forwarded to the TypedCollection
     lciowrap.add_type<EVENT::LCCollection>("LCCollection")
         .method("getNumberOfElements", &EVENT::LCCollection::getNumberOfElements)
-        .method("getElementAt", &EVENT::LCCollection::getElementAt);
-    // FIXME This is a workaround for a bug that prevents const string& return types
-    lciowrap.method("getTypeName", [](EVENT::LCCollection* c){
-        return string(c->getTypeName());
-    });
+        .method("getElementAt", &EVENT::LCCollection::getElementAt)
+        .method("getTypeName", &EVENT::LCCollection::getTypeName);
 
     lciowrap.add_type<EVENT::LCEvent>("LCEvent")
-        .method("getEventCollection", &EVENT::LCEvent::getCollection);
-    // .method("getCollectionNames", &EVENT::LCEvent::getCollectionNames);
+        .method("getEventCollection", &EVENT::LCEvent::getCollection)
+        .method("getCollectionNames", &EVENT::LCEvent::getCollectionNames);
     //
     lciowrap.add_type<IO::LCReader>("LCReader")
       .method("getNumberOfEvents", &IO::LCReader::getNumberOfEvents);

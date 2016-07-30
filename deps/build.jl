@@ -23,12 +23,12 @@ liblciowrap = library_dependency("liblciowrap")
 prefix=joinpath(BinDeps.depsdir(liblciowrap),"usr")
 lciowrap_srcdir = joinpath(BinDeps.depsdir(liblciowrap),"src","lciowrap")
 lciowrap_builddir = joinpath(BinDeps.depsdir(liblciowrap),"builds","lciowrap")
-lib_prefix = @windows ? "" : "lib"
-lib_suffix = @windows? "dll" : (@osx? "dylib" : "so")
+lib_prefix = @static is_windows() ? "" : "lib"
+lib_suffix = @static is_windows() ? "dll" : (@static is_apple() ? "dylib" : "so")
 
 # Set generator if on windows
 genopt = "Unix Makefiles"
-@windows_only begin
+@static if is_windows()
   if WORD_SIZE == 64
     genopt = "Visual Studio 14 2015 Win64"
   else

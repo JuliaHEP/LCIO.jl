@@ -42,18 +42,20 @@ immutable CalHit
 	E::Cfloat
 end
 
-# start(it::VectorStringP) = 0
-# next(it::VectorStringP,i) = (it[i], i+1)
-# done(it::VectorStringP,i) = i >= length(it)
-# getindex(it::VectorStringP,i) = String( icxx"$(it)->at($i).c_str();" )
-# length(it::VectorStringP) = icxx"$(it)->size();"
+# the iterator iterates over the stringvec
+# in reverse order!
+# in general, this should be a string set anyway, so
+# this doesn't really matter
+# uses Julia counting, 1..n
+start(it::StringVec) = length(it)
+next(it::StringVec, i) = (it[i], i-1)
+done(it::StringVec, i) = i <= 0 
+length(it::StringVec) = size(it)
+# 'at' uses C counting, 0..n-1
+getindex(it::StringVec, i) = at(it, i-1)
 
-# The iterators use the events as state
-# the lcio reader returns NULL at the end of the file
-# Because the LCIO getNext function could re-use the memory for the next event,
-# the next function should not hold the current and next event at the same time.
-# Returning current and reading nextEvent as the new state causes memory corruption
-
+# we need the iterator to keep track of the number of events
+# FIXME could actually use the reader itself as the state object
 type EventIterator
     nEvents
 end
