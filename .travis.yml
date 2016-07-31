@@ -1,20 +1,23 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
-os:
-  - linux
-sudo: required
-dist: trusty
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-6
-      - gcc-6
-env: MYCXX=g++-6 MYCC=gcc-6
-julia:
-  - nightly
-  - 0.4
+matrix:
+  include:
+  - os: linux
+    julia: 0.4
+    sudo: required
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-6
+          - gcc-6
+    env: MYCXX=g++-6 MYCC=gcc-6
+  - os: osx
+    osx_image: xcode7.3	
+    julia: 0.4
+
 notifications:
   email: false
 install:
