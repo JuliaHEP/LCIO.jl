@@ -16,7 +16,6 @@ matrix:
     env: MYCXX=g++-6 MYCC=gcc-6
   - os: osx
     julia: 0.4
-    env: MYCXX=${CXX} MYCC=${CC}
 
 notifications:
   email: false
