@@ -131,7 +131,21 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     lciowrap.add_type<EVENT::LCRelation>("LCRelation");
 
-    lciowrap.add_type<EVENT::Vertex>("Vertex");
+    lciowrap.add_type<EVENT::Vertex>("Vertex")
+        .method("isPrimary", &EVENT::Vertex::isPrimary)
+        .method("getAlgorithmType", &EVENT::Vertex::getAlgorithmType)
+        .method("getChi2", &EVENT::Vertex::getChi2)
+        .method("getProbability", &EVENT::Vertex::getProbability)
+        .method("getCovMatrix", &EVENT::Vertex::getCovMatrix)
+        .method("getParameters", &EVENT::Vertex::getParameters);
+    lciowrap.method("getPosition3", [](const EVENT::Vertex* v, ArrayRef<double> x)->bool {
+        const float* p3 = v->getPosition();
+        if (not p3) {return false;}
+        x[0] = p3[0];
+        x[1] = p3[1];
+        x[2] = p3[2];
+        return true;
+    });
 
     lciowrap.add_type<EVENT::Track>("Track");
 
