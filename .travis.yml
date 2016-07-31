@@ -3,16 +3,16 @@ language: julia
 matrix:
   include:
   - os: linux
-  sudo: required
-  dist: trusty
-  addons:
-    apt:
-      sources:
-        - ubuntu-toolchain-r-test
-      packages:
-        - g++-6
-        - gcc-6
-  env: MYCXX=g++-6 MYCC=gcc-6
+    sudo: required
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-6
+          - gcc-6
+    env: MYCXX=g++-6 MYCC=gcc-6
   - os: osx
 julia:
   - 0.4
