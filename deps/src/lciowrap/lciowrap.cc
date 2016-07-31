@@ -126,6 +126,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
     });
 
     lciowrap.add_type<EVENT::TrackerHit>("TrackerHit");
+    lciowrap.add_type<EVENT::TrackerHitVec>("TrackerHitVec")
+        .method("size", &EVENT::TrackerHitVec::size);
+    lciowrap.method("at", [](const EVENT::TrackerHitVec& vec, size_t i) {
+        return vec.at(i);
+    });
 
     #include "MCParticle.icc"
 
@@ -147,14 +152,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         return true;
     });
 
-    lciowrap.add_type<EVENT::Track>("Track");
-
-    lciowrap.add_type<EVENT::TrackVec>("TrackVec")
-        .method("size", &EVENT::TrackVec::size);
-    lciowrap.method("at", [](const EVENT::TrackVec& vec, size_t i) {
-        return vec.at(i);
-    });
-
+    #include "Track.icc"
     #include "Cluster.icc"
 
     lciowrap.add_type<EVENT::LCGenericObject>("LCGenericObject");
