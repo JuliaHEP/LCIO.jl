@@ -105,9 +105,23 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     lciowrap.add_type<EVENT::Track>("Track");
 
+    lciowrap.add_type<EVENT::TrackVec>("TrackVec")
+        .method("size", &EVENT::TrackVec::size);
+    lciowrap.method("at", [](const EVENT::TrackVec& vec, size_t i) {
+        return vec.at(i);
+    });
+
+    lciowrap.add_type<EVENT::Cluster>("Cluster");
+
+    lciowrap.add_type<EVENT::ClusterVec>("ClusterVec")
+        .method("size", &EVENT::ClusterVec::size);
+    lciowrap.method("at", [](const EVENT::ClusterVec& vec, size_t i) {
+        return vec.at(i);
+    });
+
     lciowrap.add_type<EVENT::LCGenericObject>("LCGenericObject");
 
-    lciowrap.add_type<EVENT::ReconstructedParticle>("ReconstructedParticle");
+    #include "ReconstructedParticle.icc"
 
     // most of the functionality is forwarded to the TypedCollection
     lciowrap.add_type<EVENT::LCCollection>("LCCollection")

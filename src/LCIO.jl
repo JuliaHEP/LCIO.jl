@@ -7,9 +7,8 @@ export Vec, getP4, getPosition,
     getTypeName, # LCCollection
     getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, # MCParticle
     isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, # MCParticle
-    hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, # MCParticle
+    hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum,
     getMomentumAtEndpoint, getMass, getCharge # MCParticle
-    
 const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
 if !isfile(depsfile)
   error("$depsfile not found, CxxWrap did not build properly")
@@ -113,13 +112,13 @@ end
 function getPosition(hit)
     p3 = Array{Float64,1}(3)
     valid = getP3(hit, p3)
-    return valid, p3
+    return p3
 end
 
 function getMomentum(particle)
     p3 = Array{Float64,1}(3)
     valid = getMomentum3(particle, p3)
-    return valid, p3
+    return p3
 end
 
 function getVertex(particle)
