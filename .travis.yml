@@ -1,5 +1,7 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
+julia:
+  - 0.4
 matrix:
   include:
   - os: linux
@@ -14,8 +16,8 @@ matrix:
           - gcc-6
     env: MYCXX=g++-6 MYCC=gcc-6
   - os: osx
-julia:
-  - 0.4
+    env: MYCXX=${CXX} MYCC=${CC}
+
 notifications:
   email: false
 install:
