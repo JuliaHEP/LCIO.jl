@@ -111,7 +111,7 @@ end
 
 function getPosition(hit)
     p3 = Array{Float64,1}(3)
-    valid = getP3(hit, p3)
+    valid = getPosition3(hit, p3)
     return p3
 end
 

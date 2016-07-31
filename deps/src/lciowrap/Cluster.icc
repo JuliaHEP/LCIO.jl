@@ -1,0 +1,34 @@
+// This is the implementation of the wrappers for the Cluster class
+
+lciowrap.add_type<EVENT::Cluster>("Cluster")
+    .method("getType", &EVENT::Cluster::getType)
+    .method("getEnergy", &EVENT::Cluster::getEnergy)
+    .method("getEnergyError", &EVENT::Cluster::getEnergyError)
+    .method("getPositionError", &EVENT::Cluster::getPositionError)
+    .method("getITheta", &EVENT::Cluster::getITheta)
+    .method("getIPhi", &EVENT::Cluster::getIPhi)
+    .method("getDirectionError", &EVENT::Cluster::getDirectionError)
+    .method("getShape", &EVENT::Cluster::getShape)
+    .method("getParticleIDs", &EVENT::Cluster::getParticleIDs)
+    .method("getCalorimeterHits", &EVENT::Cluster::getCalorimeterHits)
+    .method("getHitContributions", &EVENT::Cluster::getHitContributions)
+    .method("getSubdetectorEnergies", &EVENT::Cluster::getSubdetectorEnergies);
+
+lciowrap.add_type<EVENT::ClusterVec>("ClusterVec")
+    .method("size", &EVENT::ClusterVec::size);
+lciowrap.method("at", [](const EVENT::ClusterVec& vec, size_t i) {
+    return vec.at(i);
+});
+
+lciowrap.method("getClusters", [](const EVENT::Cluster* c)->const ClusterVec& {
+    return c->getClusters();
+});
+
+lciowrap.method("getPosition3", [](const EVENT::Cluster* c, ArrayRef<double> x)->bool {
+    const float* p3 = c->getPosition();
+    if (not p3) {return false;}
+    x[0] = p3[0];
+    x[1] = p3[1];
+    x[2] = p3[2];
+    return true;
+});

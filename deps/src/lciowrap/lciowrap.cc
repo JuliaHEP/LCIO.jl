@@ -3,21 +3,23 @@
 #include <vector>
 #include <iostream>
 
-#include "IO/LCReader.h"
-#include "IOIMPL/LCFactory.h"
-#include "EVENT/LCEvent.h"
+#include "EVENT/Cluster.h"
 #include "EVENT/LCCollection.h"
+#include "EVENT/LCEvent.h"
+#include "EVENT/LCGenericObject.h"
+#include "EVENT/LCRelation.h"
 #include "EVENT/MCParticle.h"
+#include "EVENT/ParticleID.h"
+#include "EVENT/ReconstructedParticle.h"
 #include "EVENT/SimCalorimeterHit.h"
-#include "EVENT/TrackerHit.h"
 #include "EVENT/SimTrackerHit.h"
 #include "EVENT/Track.h"
-#include "EVENT/ReconstructedParticle.h"
+#include "EVENT/TrackerHit.h"
 #include "EVENT/Vertex.h"
-#include "EVENT/LCRelation.h"
-#include "EVENT/LCGenericObject.h"
-#include "UTIL/CellIDDecoder.h"
+#include "IO/LCReader.h"
+#include "IOIMPL/LCFactory.h"
 #include "UTIL/BitField64.h"
+#include "UTIL/CellIDDecoder.h"
 
 using namespace std;
 using namespace cxx_wrap;
@@ -76,13 +78,36 @@ JULIA_CPP_MODULE_BEGIN(registry)
     lciowrap.method("at", [](const vector<string>* vec, size_t i) {
         return vec->at(i);
     });
+    lciowrap.add_type<vector<float>>("FloatVec")
+        .method("size", &EVENT::FloatVec::size);
+    lciowrap.method("at", [](const vector<float>* vec, size_t i) {
+        return vec->at(i);
+    });
+    lciowrap.add_type<vector<int>>("IntVec")
+        .method("size", &EVENT::IntVec::size);
+    lciowrap.method("at", [](const vector<int>* vec, size_t i) {
+        return vec->at(i);
+    });
+
 
     lciowrap.add_type<EVENT::LCObject>("LCObject");
+
+    lciowrap.add_type<EVENT::ParticleID>("ParticleID")
+        .method("getType", &EVENT::ParticleID::getType)
+        .method("getPDG", &EVENT::ParticleID::getPDG)
+        .method("getLikelihood", &EVENT::ParticleID::getLikelihood)
+        .method("getAlgorithmType", &EVENT::ParticleID::getAlgorithmType)
+        .method("getParameters", &EVENT::ParticleID::getParameters);
+    lciowrap.add_type<EVENT::ParticleIDVec>("ParticleIDVec")
+        .method("size", &EVENT::ParticleIDVec::size);
+    lciowrap.method("at", [](const EVENT::ParticleIDVec& vec, size_t i) {
+        return vec.at(i);
+    });
 
     lciowrap.add_type<EVENT::SimCalorimeterHit>("SimCalorimeterHit")
         .method("getEnergy", &EVENT::SimCalorimeterHit::getEnergy);
     // returns a bool to indicate whether this was a nullptr
-    lciowrap.method("getP3", [](const EVENT::SimCalorimeterHit* hit, ArrayRef<double> x)->bool {
+    lciowrap.method("getPosition3", [](const EVENT::SimCalorimeterHit* hit, ArrayRef<double> x)->bool {
             const float* p = hit->getPosition();
             if (not p) {return false;}
             x[0] = p[0];
@@ -94,6 +119,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
     lciowrap.add_type<EVENT::SimTrackerHit>("SimTrackerHit");
 
     lciowrap.add_type<EVENT::CalorimeterHit>("CalorimeterHit");
+    lciowrap.add_type<EVENT::CalorimeterHitVec>("CalorimeterHitVec")
+        .method("size", &EVENT::CalorimeterHitVec::size);
+    lciowrap.method("at", [](const EVENT::CalorimeterHitVec& vec, size_t i) {
+        return vec.at(i);
+    });
 
     lciowrap.add_type<EVENT::TrackerHit>("TrackerHit");
 
@@ -111,13 +141,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         return vec.at(i);
     });
 
-    lciowrap.add_type<EVENT::Cluster>("Cluster");
-
-    lciowrap.add_type<EVENT::ClusterVec>("ClusterVec")
-        .method("size", &EVENT::ClusterVec::size);
-    lciowrap.method("at", [](const EVENT::ClusterVec& vec, size_t i) {
-        return vec.at(i);
-    });
+    #include "Cluster.icc"
 
     lciowrap.add_type<EVENT::LCGenericObject>("LCGenericObject");
 
