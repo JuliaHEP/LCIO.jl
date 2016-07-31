@@ -1,20 +1,20 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
-os:
-  - linux
-  - osx
-sudo: required
-dist: trusty
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-6
-      - gcc-6
-env: MYCXX=g++-6 MYCC=gcc-6
+matrix:
+  include:
+  - os: linux
+  sudo: required
+  dist: trusty
+  addons:
+    apt:
+      sources:
+        - ubuntu-toolchain-r-test
+      packages:
+        - g++-6
+        - gcc-6
+  env: MYCXX=g++-6 MYCC=gcc-6
+  - os: osx
 julia:
-  - nightly
   - 0.4
 notifications:
   email: false
