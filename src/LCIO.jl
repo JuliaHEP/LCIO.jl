@@ -139,4 +139,29 @@ function getMomentumAtEndpoint(particle)
     return valid, p3
 end
 
+# the navigator gets initialized with a collection
+# it defers the actual work to the C++ implementation
+immutable LCRelationNavigator
+    relnav
+    fromType
+    toType
+    LCRelationNavigator(coll::TypedCollection) = _completNavigator(new(LCRelNav(coll.coll)))
+end
+
+function _completNavigator(nav)
+    nav.fromType = LCIOTypemap[nav.relnav.getFromType()]
+    nav.toType = LCIOTypemap[nav.relnav.getToType()]
+    nav
+end
+
+# this ensures that the types are appropriately cast
+function getRelatedToObjects(nav::LCRelationNavigator, obj)
+    [CastOperator{nav.toType}.cast(x) for x in getRelatedToObjects(nav.relnav)]
+end
+
+# this ensures that the types are appropriately cast
+function getRelatedFromObjects(nav::LCRelationNavigator, obj)
+    [CastOperator{nav.fromType}.cast(x) for x in getRelatedFromObjects(nav.relnav)]
+end
+
 end

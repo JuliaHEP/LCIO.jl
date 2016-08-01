@@ -1,4 +1,4 @@
-// This is the implementation of the wrappers for the Track and Trackstate classes
+// This is the implementation of the wrappers for the different CalorimeterHit classes
 
 lciowrap.add_type<EVENT::RawCalorimeterHit>("RawCalorimeterHit")
     .method("getCellID0", &EVENT::RawCalorimeterHit::getCellID0)

@@ -15,12 +15,16 @@
 #include "EVENT/SimCalorimeterHit.h"
 #include "EVENT/SimTrackerHit.h"
 #include "EVENT/Track.h"
+#include "EVENT/TrackerData.h"
+#include "EVENT/TrackerPulse.h"
+#include "EVENT/TrackerRawData.h"
 #include "EVENT/TrackerHit.h"
 #include "EVENT/Vertex.h"
 #include "IO/LCReader.h"
 #include "IOIMPL/LCFactory.h"
 #include "UTIL/BitField64.h"
 #include "UTIL/CellIDDecoder.h"
+#include "UTIL/LCRelationNavigator.h"
 
 using namespace std;
 using namespace cxx_wrap;
@@ -72,6 +76,15 @@ struct TypedCollection
     }
 };
 
+// This is just a functor to cast an LCObject to the right type
+template<typename T>
+struct CastOperator
+{
+    T* cast(LCObject* orig) {
+        return static_cast<T*>(orig);
+    }
+};
+
 JULIA_CPP_MODULE_BEGIN(registry)
     cxx_wrap::Module& lciowrap = registry.create_module("LCIO");
     lciowrap.add_type<vector<string>>("StringVec")
@@ -89,6 +102,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
     lciowrap.method("at", [](const vector<int>* vec, size_t i) {
         return vec->at(i);
     });
+    // lciowrap.add_type<vector<short>>("ShortVec")
+    //     .method("size", &EVENT::ShortVec::size);
+    // lciowrap.method("at", [](const vector<short>* vec, size_t i) {
+    //     return vec->at(i);
+    // });
 
     lciowrap.add_type<EVENT::LCParameters>("LCParameters")
         .method("getIntVal", &EVENT::LCParameters::getIntVal)
@@ -111,6 +129,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getParameters", &EVENT::LCRunHeader::getParameters);
 
     lciowrap.add_type<EVENT::LCObject>("LCObject");
+    lciowrap.add_type<EVENT::LCObjectVec>("LCObjectVec")
+        .method("size", &EVENT::LCObjectVec::size);
+    lciowrap.method("at", [](const EVENT::LCObjectVec& vec, size_t i) {
+        return vec.at(i);
+    });
 
     lciowrap.add_type<EVENT::ParticleID>("ParticleID")
         .method("getType", &EVENT::ParticleID::getType)
@@ -128,14 +151,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     #include "CalorimeterHitTypes.icc"
 
-    lciowrap.add_type<EVENT::SimTrackerHit>("SimTrackerHit");
-
-    lciowrap.add_type<EVENT::TrackerHit>("TrackerHit");
-    lciowrap.add_type<EVENT::TrackerHitVec>("TrackerHitVec")
-        .method("size", &EVENT::TrackerHitVec::size);
-    lciowrap.method("at", [](const EVENT::TrackerHitVec& vec, size_t i) {
-        return vec.at(i);
-    });
+    #include "TrackerHitTypes.icc"
 
     lciowrap.add_type<EVENT::LCRelation>("LCRelation")
         .method("getFrom", &EVENT::LCRelation::getFrom)
@@ -161,7 +177,17 @@ JULIA_CPP_MODULE_BEGIN(registry)
     #include "Track.icc"
     #include "Cluster.icc"
 
-    lciowrap.add_type<EVENT::LCGenericObject>("LCGenericObject");
+    lciowrap.add_type<EVENT::LCGenericObject>("LCGenericObject")
+        .method("getNInt", &EVENT::LCGenericObject::getNInt)
+        .method("getNFloat", &EVENT::LCGenericObject::getNFloat)
+        .method("getNDouble", &EVENT::LCGenericObject::getNDouble)
+        .method("getIntVal", &EVENT::LCGenericObject::getIntVal)
+        .method("getFloatVal", &EVENT::LCGenericObject::getFloatVal)
+        .method("getDoubleVal", &EVENT::LCGenericObject::getDoubleVal)
+        .method("isFixedSize", &EVENT::LCGenericObject::isFixedSize)
+        .method("getTypeName", &EVENT::LCGenericObject::getTypeName)
+        .method("getDataDescription", &EVENT::LCGenericObject::getDataDescription)
+        .method("id", &EVENT::LCGenericObject::id);
 
     #include "ReconstructedParticle.icc"
 
@@ -221,8 +247,31 @@ JULIA_CPP_MODULE_BEGIN(registry)
     {
         typedef typename decltype(wrapped)::type WrappedT;
         wrapped.template constructor<const EVENT::LCCollection*>();
-        // wrapped.template constructor<const string&>();
         wrapped.method("get", &WrappedT::operator());
     });
+
+    lciowrap.add_type<UTIL::LCRelationNavigator>("LCRelNav")
+        .method("getFromType", &UTIL::LCRelationNavigator::getFromType)
+        .method("getToType", &UTIL::LCRelationNavigator::getToType)
+        .method("getRelatedToObjects", &UTIL::LCRelationNavigator::getRelatedToObjects)
+        .method("getRelatedFromObjects", &UTIL::LCRelationNavigator::getRelatedFromObjects)
+        .method("getRelatedFromWeights", &UTIL::LCRelationNavigator::getRelatedFromWeights)
+        .method("getRelatedToWeights", &UTIL::LCRelationNavigator::getRelatedToWeights);
+
+    lciowrap.add_type<Parametric<TypeVar<1>>>("CastOperator")
+    .apply<CastOperator<EVENT::SimCalorimeterHit>
+         , CastOperator<EVENT::CalorimeterHit>
+         , CastOperator<EVENT::MCParticle>
+         , CastOperator<EVENT::ReconstructedParticle>
+         , CastOperator<EVENT::TrackerHit>
+         , CastOperator<EVENT::SimTrackerHit>
+         , CastOperator<EVENT::LCGenericObject>
+         , CastOperator<EVENT::Track>
+         , CastOperator<EVENT::Vertex>>([](auto wrapped)
+    {
+        typedef typename decltype(wrapped)::type LCType;
+        wrapped.method("cast", &LCType::cast);
+    });
+
 
 JULIA_CPP_MODULE_END
