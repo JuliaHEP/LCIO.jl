@@ -10,6 +10,7 @@
 #include "EVENT/LCRelation.h"
 #include "EVENT/MCParticle.h"
 #include "EVENT/ParticleID.h"
+#include "EVENT/RawCalorimeterHit.h"
 #include "EVENT/ReconstructedParticle.h"
 #include "EVENT/SimCalorimeterHit.h"
 #include "EVENT/SimTrackerHit.h"
@@ -89,6 +90,25 @@ JULIA_CPP_MODULE_BEGIN(registry)
         return vec->at(i);
     });
 
+    lciowrap.add_type<EVENT::LCParameters>("LCParameters")
+        .method("getIntVal", &EVENT::LCParameters::getIntVal)
+        .method("getFloatVal", &EVENT::LCParameters::getFloatVal)
+        .method("getStringVal", &EVENT::LCParameters::getStringVal)
+        .method("getIntVals", &EVENT::LCParameters::getIntVals)
+        .method("getFloatVals", &EVENT::LCParameters::getFloatVals)
+        .method("getStringVals", &EVENT::LCParameters::getStringVals)
+        .method("getIntKeys", &EVENT::LCParameters::getStringKeys)
+        .method("getFloatKeys", &EVENT::LCParameters::getFloatKeys)
+        .method("getStringKeys", &EVENT::LCParameters::getStringKeys)
+        .method("getNInt", &EVENT::LCParameters::getNInt)
+        .method("getNFloat", &EVENT::LCParameters::getNFloat)
+        .method("getNString", &EVENT::LCParameters::getNString);
+
+    lciowrap.add_type<EVENT::LCRunHeader>("LCRunHeader")
+        .method("getRunNumber", &EVENT::LCRunHeader::getRunNumber)
+        .method("getDetectorName", &EVENT::LCRunHeader::getDetectorName)
+        .method("getDescription", &EVENT::LCRunHeader::getDescription)
+        .method("getParameters", &EVENT::LCRunHeader::getParameters);
 
     lciowrap.add_type<EVENT::LCObject>("LCObject");
 
@@ -104,26 +124,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
         return vec.at(i);
     });
 
-    lciowrap.add_type<EVENT::SimCalorimeterHit>("SimCalorimeterHit")
-        .method("getEnergy", &EVENT::SimCalorimeterHit::getEnergy);
-    // returns a bool to indicate whether this was a nullptr
-    lciowrap.method("getPosition3", [](const EVENT::SimCalorimeterHit* hit, ArrayRef<double> x)->bool {
-            const float* p = hit->getPosition();
-            if (not p) {return false;}
-            x[0] = p[0];
-            x[1] = p[1];
-            x[2] = p[2];
-            return true;
-        });
+    #include "MCParticle.icc"
+
+    #include "CalorimeterHitTypes.icc"
 
     lciowrap.add_type<EVENT::SimTrackerHit>("SimTrackerHit");
-
-    lciowrap.add_type<EVENT::CalorimeterHit>("CalorimeterHit");
-    lciowrap.add_type<EVENT::CalorimeterHitVec>("CalorimeterHitVec")
-        .method("size", &EVENT::CalorimeterHitVec::size);
-    lciowrap.method("at", [](const EVENT::CalorimeterHitVec& vec, size_t i) {
-        return vec.at(i);
-    });
 
     lciowrap.add_type<EVENT::TrackerHit>("TrackerHit");
     lciowrap.add_type<EVENT::TrackerHitVec>("TrackerHitVec")
@@ -132,9 +137,10 @@ JULIA_CPP_MODULE_BEGIN(registry)
         return vec.at(i);
     });
 
-    #include "MCParticle.icc"
-
-    lciowrap.add_type<EVENT::LCRelation>("LCRelation");
+    lciowrap.add_type<EVENT::LCRelation>("LCRelation")
+        .method("getFrom", &EVENT::LCRelation::getFrom)
+        .method("getTo", &EVENT::LCRelation::getTo)
+        .method("getWeight", &EVENT::LCRelation::getWeight);
 
     lciowrap.add_type<EVENT::Vertex>("Vertex")
         .method("isPrimary", &EVENT::Vertex::isPrimary)

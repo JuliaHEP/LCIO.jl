@@ -1,0 +1,53 @@
+// This is the implementation of the wrappers for the Track and Trackstate classes
+
+lciowrap.add_type<EVENT::RawCalorimeterHit>("RawCalorimeterHit")
+    .method("getCellID0", &EVENT::RawCalorimeterHit::getCellID0)
+    .method("getCellID1", &EVENT::RawCalorimeterHit::getCellID1)
+    .method("getAmplitude", &EVENT::RawCalorimeterHit::getAmplitude)
+    .method("getTimeStamp", &EVENT::RawCalorimeterHit::getTimeStamp);
+
+lciowrap.add_type<EVENT::SimCalorimeterHit>("SimCalorimeterHit")
+    .method("getCellID0", &EVENT::SimCalorimeterHit::getCellID0)
+    .method("getCellID1", &EVENT::SimCalorimeterHit::getCellID1)
+    .method("getEnergy", &EVENT::SimCalorimeterHit::getEnergy)
+    .method("getNMCContributions", &EVENT::SimCalorimeterHit::getNMCContributions)
+    .method("getEnergyCont", &EVENT::SimCalorimeterHit::getEnergyCont)
+    .method("getTimeCont", &EVENT::SimCalorimeterHit::getTimeCont)
+    .method("getPDGCont", &EVENT::SimCalorimeterHit::getPDGCont)
+    .method("getParticleCont", &EVENT::SimCalorimeterHit::getParticleCont);
+
+// returns a bool to indicate whether this was a nullptr
+lciowrap.method("getPosition3", [](const EVENT::SimCalorimeterHit* hit, ArrayRef<double> x)->bool {
+        const float* p = hit->getPosition();
+        if (not p) {return false;}
+        x[0] = p[0];
+        x[1] = p[1];
+        x[2] = p[2];
+        return true;
+    });
+
+lciowrap.add_type<EVENT::CalorimeterHit>("CalorimeterHit")
+    .method("getCellID0", &EVENT::CalorimeterHit::getCellID0)
+    .method("getCellID1", &EVENT::CalorimeterHit::getCellID1)
+    .method("getEnergy", &EVENT::CalorimeterHit::getEnergy)
+    .method("getEnergyError", &EVENT::CalorimeterHit::getEnergyError)
+    .method("getTime", &EVENT::CalorimeterHit::getTime)
+    .method("getType", &EVENT::CalorimeterHit::getType);
+lciowrap.method("getPosition3", [](const EVENT::CalorimeterHit* hit, ArrayRef<double> x)->bool {
+    const float* p = hit->getPosition();
+    if (not p) {return false;}
+        x[0] = p[0];
+        x[1] = p[1];
+        x[2] = p[2];
+    return true;
+});
+lciowrap.method("getRawHit", [](const EVENT::CalorimeterHit* hit)->RawCalorimeterHit* {
+    return static_cast<RawCalorimeterHit*>(hit->getRawHit());
+});
+
+
+lciowrap.add_type<EVENT::CalorimeterHitVec>("CalorimeterHitVec")
+    .method("size", &EVENT::CalorimeterHitVec::size);
+lciowrap.method("at", [](const EVENT::CalorimeterHitVec& vec, size_t i) {
+    return vec.at(i);
+});
