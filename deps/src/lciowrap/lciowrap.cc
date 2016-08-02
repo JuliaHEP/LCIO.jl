@@ -29,31 +29,6 @@
 using namespace std;
 using namespace cxx_wrap;
 
-inline IO::LCReader*
-createReader() {
-    return IOIMPL::LCFactory::getInstance()->createLCReader();
-}
-
-inline void
-deleteReader(IO::LCReader* reader) {
-    delete reader;
-}
-
-inline void
-openFile(IO::LCReader* reader, const std::string& filename) {
-    reader->open(filename);
-}
-
-inline EVENT::LCEvent*
-readNextEvent(IO::LCReader* reader) {
-    return reader->readNextEvent();
-}
-
-inline void
-closeFile(IO::LCReader* reader) {
-    reader->close();
-}
-
 // This is just a simple wrapper class around the lccollection pointer
 // This will be constructed together with the type, which can be inferred from
 // the collection name parameter
@@ -203,18 +178,25 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getDetectorName", &EVENT::LCEvent::getDetectorName)
         .method("getEventNumber", &EVENT::LCEvent::getEventNumber)
         .method("getRunNumber", &EVENT::LCEvent::getRunNumber);
-    //
+
+    // LCReader
     lciowrap.add_type<IO::LCReader>("LCReader")
       .method("getNumberOfEvents", &IO::LCReader::getNumberOfEvents);
-        // .method("open", &IO::LCReader::open)
-        // .method("readNextEvent", &IO::LCReader::readNextEvent)
-        // .method("close", &IO::LCReader::close);
-    lciowrap.method("createLCReader", &createReader);
-    lciowrap.method("deletLCReader", &deleteReader);
-    lciowrap.method("openFile", &openFile);
-    lciowrap.method("readNextEvent", &readNextEvent);
-    lciowrap.method("closeFile", &closeFile);
-
+    lciowrap.method("createLCReader", [](){
+        return IOIMPL::LCFactory::getInstance()->createLCReader();
+    });
+    lciowrap.method("deleteLCReader", [](IO::LCReader* reader){
+        delete reader;
+    });
+    lciowrap.method("openFile", [](IO::LCReader* reader, const std::string& filename) {
+        reader->open(filename);
+    });
+    lciowrap.method("readNextEvent", [](IO::LCReader* reader) {
+        return reader->readNextEvent();
+    });
+    lciowrap.method("closeFile", [](IO::LCReader* reader) {
+        reader->close();
+    });
 
     lciowrap.add_type<Parametric<TypeVar<1>>>("TypedCollection")
         .apply<TypedCollection<EVENT::SimCalorimeterHit>

@@ -1,6 +1,6 @@
 using LCIO
 
-for (idx, event) in enumerate(LCIO.open(ARGS[1]))
+LCIO.iterate(ARGS[1]) do event
 	println(repeat("/", 35))
 	println("EVENT: ", getEventNumber(event))
 	println("RUN: ", getRunNumber(event))

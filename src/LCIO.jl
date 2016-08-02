@@ -17,13 +17,10 @@ include(depsfile)
 
 wrap_module(_l_lciowrap)
 
-function __init__()
-    global reader = createLCReader()
-    atexit() do
-        # CxxWrap'ed objects automatically call delete in the finalizer
-        # deletLCReader(reader)
-    end
-end
+# function __init__()
+#     atexit() do
+#     end
+# end
 
 immutable Vec
 	x::Cdouble
@@ -55,30 +52,21 @@ length(it::StringVec) = size(it)
 # 'at' uses C counting, 0..n-1
 getindex(it::StringVec, i) = at(it, i-1)
 
-# we need the iterator to keep track of the number of events
-# FIXME could actually use the reader itself as the state object
-type EventIterator
-    nEvents
-end
-start(it::EventIterator) = 0
-function next(it::EventIterator, state)
-    it.nEvents -= 1
-    (readNextEvent(reader), it.nEvents-1)
-end
-function done(it::EventIterator, state)
-	isdone = 0 == it.nEvents
-	if isdone
-		closeFile(reader)
-	end
-	isdone
-end
+start(it::LCReader) = getNumberOfEvents(it)
+next(it::LCReader, state) = readNextEvent(it), state-1
+done(it::LCReader, state) = state <= 1
 
-# open file with reader, returns iterator
-function open(fn::AbstractString)
-	openFile(reader, fn)
-	# returns an iterator
-	# the iterator knows about the global reader object
-	return EventIterator(getNumberOfEvents(reader))
+function iterate(f::Function, fn::AbstractString)
+    reader = createLCReader()
+    openFile(reader, fn)
+    try
+        for event in reader
+            f(event)
+        end
+    finally
+        closeFile(reader)
+        deleteLCReader(reader)
+    end
 end
 
 # map from names stored in collection to actual types

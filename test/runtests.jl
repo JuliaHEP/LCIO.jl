@@ -2,8 +2,7 @@ using LCIO
 using Base.Test
 
 # test iteration
-for (idx, event) in enumerate(LCIO.open("test.slcio"))
-    @test getEventNumber(event) == idx-1
+LCIO.iterate("test.slcio") do event
     mcparts = getCollection(event, "MCParticle")
     for p in mcparts
         e = getEnergy(p)
@@ -19,8 +18,7 @@ for (idx, event) in enumerate(LCIO.open("test.slcio"))
 end
 
 # test that everything is closed and opened properly
-for (idx, event) in enumerate(LCIO.open("test.slcio"))
-    @test getEventNumber(event) == idx-1
+LCIO.iterate("test.slcio") do event
     @test length(getCollectionNames(event)) == 17
     @test getDetectorName(event) == "sidaug05"
 end
