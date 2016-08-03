@@ -36,3 +36,16 @@ Examples:
 end
 ```
  - A notable exception is `getPosition` for hits, and `getMomentum` for particles, which we assume always return valid values
+
+Getting Started
+---------------
+The basic construct for iterating over a file is this construct:
+```
+using LCIO
+LCIO.open("file.slcio") do reader
+    for event in reader
+        println(getEventNumber(event))
+    end
+end
+```
+There are more examples in the `examples/` directory.
