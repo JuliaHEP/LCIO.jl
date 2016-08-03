@@ -2,13 +2,16 @@ __precompile__(false)
 module LCIO
 using CxxWrap
 import Base: getindex, start, done, next, length, +, convert
-export Vec, getP4, getPosition,
+export Vec, CalHit, getP4, getPosition,
     getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
     getTypeName, # LCCollection
     getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, # MCParticle
     isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, # MCParticle
     hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, # MCParticle
-    getMomentumAtEndpoint, getMass, getCharge # MCParticle
+    getMomentumAtEndpoint, getMass, getCharge, # MCParticle
+    getCalorimeterHits, # Cluster
+    getClusters # ReconstructedParticle
+
 
 const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
 if !isfile(depsfile)
