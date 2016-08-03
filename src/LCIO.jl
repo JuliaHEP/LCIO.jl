@@ -7,8 +7,9 @@ export Vec, getP4, getPosition,
     getTypeName, # LCCollection
     getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, # MCParticle
     isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, # MCParticle
-    hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum,
+    hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, # MCParticle
     getMomentumAtEndpoint, getMass, getCharge # MCParticle
+
 const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
 if !isfile(depsfile)
   error("$depsfile not found, CxxWrap did not build properly")
@@ -44,13 +45,16 @@ immutable CalHit
 	E::Cfloat
 end
 
+# iteration over std vectors
+typealias StdVecs Union{ClusterVec, CalorimeterHitVec, TrackVec, StringVec}
+
 # uses Julia counting, 1..n
-start(it::StringVec) = convert(UInt64, 1)
-next(it::StringVec, i) = (it[i], i+1)
-done(it::StringVec, i) = i > length(it)
-length(it::StringVec) = size(it)
+start(it::StdVecs) = convert(UInt64, 1)
+next(it::StdVecs, i) = (it[i], i+1)
+done(it::StdVecs, i) = i > length(it)
+length(it::StdVecs) = size(it)
 # 'at' uses C counting, 0..n-1
-getindex(it::StringVec, i) = at(it, i-1)
+getindex(it::StdVecs    , i) = at(it, i-1)
 
 start(it::LCReader) = getNumberOfEvents(it)
 next(it::LCReader, state) = readNextEvent(it), state-1
@@ -69,15 +73,30 @@ function iterate(f::Function, fn::AbstractString)
     end
 end
 
+function open(f::Function, fn::AbstractString)
+    reader = createLCReader()
+    openFile(reader, fn)
+    try
+        f(reader)
+    finally
+        closeFile(reader)
+        deleteLCReader(reader)
+    end
+end
+
+
 # map from names stored in collection to actual types
 LCIOTypemap = Dict(
-	"SimCalorimeterHit" => SimCalorimeterHit,
     "CalorimeterHit" => CalorimeterHit,
-	"TrackerHit" => TrackerHit,
-	"SimTrackerHit" => SimTrackerHit,
-	"MCParticle" => MCParticle,
-	"Track" => Track,
 	"LCGenericObject" => LCGenericObject,
+	"MCParticle" => MCParticle,
+    "RawCalorimeterHit" => RawCalorimeterHit,
+    "ReconstructedParticle" => ReconstructedParticle,
+	"SimCalorimeterHit" => SimCalorimeterHit,
+	"SimTrackerHit" => SimTrackerHit,
+	"Track" => Track,
+	"TrackerHit" => TrackerHit,
+    "Vertex" => Vertex,
 )
 
 start(it::TypedCollection) = length(it)
@@ -150,6 +169,32 @@ end
 # this ensures that the types are appropriately cast
 function getRelatedFromObjects(nav::LCRelationNavigator, obj)
     [CastOperator{nav.fromType}.cast(x) for x in getRelatedFromObjects(nav.relnav)]
+end
+# should work for all particle types
+function getP4(x)
+    p3 = getMomentum(x)
+    E = getEnergy(x)
+    return Vec(p3[1], p3[2], p3[3], E)
+end
+
+function getP3(x)
+    p = getPosition(x)
+    return ThreeVec(p...)
+end
+
+# converters to keep older code working
+typealias CalHits Union{SimCalorimeterHit, CalorimeterHit, RawCalorimeterHit}
+
+function CalHit(h::CalHits)
+    p = getPosition(h)
+    E = getEnergy(h)
+    return CalHit(p[1], p[2], p[3], E)
+end
+
+function convert(::Type(CalHit), h::CalHits)
+    p = getPosition(h)
+    E = getEnergy(h)
+    return CalHit(p[1], p[2], p[3], E)
 end
 
 end
