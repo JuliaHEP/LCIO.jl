@@ -5,13 +5,9 @@ import Base: getindex, start, done, next, length, +, convert
 export Vec, CalHit, getP4, getPosition,
     getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
     getTypeName, # LCCollection
-    getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, # MCParticle
-    isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, # MCParticle
-    hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, # MCParticle
-    getMomentumAtEndpoint, getMass, getCharge, # MCParticle
+    getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, getMomentumAtEndpoint, getMass, getCharge, # MCParticle
     getCalorimeterHits, # Cluster
-    getClusters # ReconstructedParticle
-
+    getClusters, getType, isCompound, getMass, getCharge, getReferencePoint, getParticleIDs, getParticleIDUsed, getGoodnessOfPID, getParticles, getClusters, getTracks, getStartVertex, getEndVertex # ReconstructedParticle
 
 const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
 if !isfile(depsfile)
