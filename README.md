@@ -39,7 +39,7 @@ end
 
 Getting Started
 ---------------
-The basic construct for iterating over a file is this construct:
+The basic construct for iterating over a file is this:
 ```
 using LCIO
 LCIO.open("file.slcio") do reader
