@@ -224,13 +224,14 @@ JULIA_CPP_MODULE_BEGIN(registry)
 
     lciowrap.add_type<Parametric<TypeVar<1>>>("CellIDDecoder")
         .apply<UTIL::CellIDDecoder<EVENT::SimCalorimeterHit>
+             , UTIL::CellIDDecoder<EVENT::RawCalorimeterHit>
              , UTIL::CellIDDecoder<EVENT::CalorimeterHit>
              , UTIL::CellIDDecoder<EVENT::TrackerHit>
              , UTIL::CellIDDecoder<EVENT::SimTrackerHit>>([](auto wrapped)
     {
         typedef typename decltype(wrapped)::type WrappedT;
         wrapped.template constructor<const EVENT::LCCollection*>();
-        wrapped.method("get", &WrappedT::operator());
+        wrapped.method("call", &WrappedT::operator());
     });
 
     lciowrap.add_type<UTIL::LCRelationNavigator>("LCRelNav")

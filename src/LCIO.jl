@@ -2,7 +2,7 @@ __precompile__(false)
 module LCIO
 using CxxWrap
 import Base: getindex, start, done, next, length, +, convert
-export Vec, CalHit, getP4, getPosition,
+export Vec, CalHit, getP4, getPosition, CellIDDecoder,
     getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
     getTypeName, # LCCollection
     getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, getMomentumAtEndpoint, getMass, getCharge, # MCParticle
