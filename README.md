@@ -8,6 +8,7 @@ This is a package for reading the LCIO file format, used for studies of the Inte
 
 Prerequisites
 -------------
+ - The julia programming language: http://julialang.org/
  - A compiler that accepts the --std=c++-14 flag
  - An existing LCIO installation (requirement might be removed in the future)
 
