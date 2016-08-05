@@ -18,7 +18,15 @@ LCIO.iterate("test.slcio") do event
 end
 
 # test that everything is closed and opened properly
-LCIO.iterate("test.slcio") do event
-    @test length(getCollectionNames(event)) == 17
-    @test getDetectorName(event) == "sidaug05"
+LCIO.open("test.slcio") do reader
+for event in reader
+    @test length(getCollectionNames(event)) == 23
+    @test getDetectorName(event) == "sidloi3_scint1x1"
+    HcalBarrelHits = getCollection(event, "HcalBarrelHits")
+    @test getTypeName(HcalBarrelHits) == "LCIO.SimCalorimeterHit"
+    decode = CellIDDecoder(HcalBarrelHits)
+    for h in HcalBarrelHits
+        @test 0 <= decode(h)["layer"] <= 39
+    end
+end
 end
