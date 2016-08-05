@@ -218,9 +218,29 @@ JULIA_CPP_MODULE_BEGIN(registry)
         wrapped.method("coll", &WrappedColl::coll);
     });
 
+    // lciowrap.add_type<UTIL::BitFieldValue>("BitFieldValue")
+    //     .constructor<long long &, const string, unsigned, int>()
+    //     .method("value", &UTIL::BitFieldValue::value)
+    //     .method("name", &UTIL::BitFieldValue::name)
+    //     .method("offset", &UTIL::BitFieldValue::offset)
+    //     .method("width", &UTIL::BitFieldValue::width)
+    //     .method("isSigned", &UTIL::BitFieldValue::isSigned);
+
     lciowrap.add_type<UTIL::BitField64>("BitField64")
         .constructor<const string&>()
-        .method("getValue", &UTIL::BitField64::getValue);
+        .method("getValue", &UTIL::BitField64::getValue)
+        .method("size", &UTIL::BitField64::size)
+        .method("index", &UTIL::BitField64::index)
+        .method("lowWord", &UTIL::BitField64::lowWord)
+        .method("highWord", &UTIL::BitField64::highWord)
+        .method("fieldDescription", &UTIL::BitField64::fieldDescription)
+        .method("valueString", &UTIL::BitField64::valueString);
+    lciowrap.method("getindex", [](const UTIL::BitField64& b, const string s)->long long {
+        return b[s].value();
+    });
+    lciowrap.method("getindex", [](const UTIL::BitField64& b, size_t index)->long long {
+        return b[index].value();
+    });
 
     lciowrap.add_type<Parametric<TypeVar<1>>>("CellIDDecoder")
         .apply<UTIL::CellIDDecoder<EVENT::SimCalorimeterHit>
