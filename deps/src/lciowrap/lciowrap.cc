@@ -199,15 +199,16 @@ JULIA_CPP_MODULE_BEGIN(registry)
     });
 
     lciowrap.add_type<Parametric<TypeVar<1>>>("TypedCollection")
-        .apply<TypedCollection<EVENT::SimCalorimeterHit>
-             , TypedCollection<EVENT::CalorimeterHit>
+        .apply<TypedCollection<EVENT::CalorimeterHit>
+             , TypedCollection<EVENT::Cluster>
              , TypedCollection<EVENT::MCParticle>
-             , TypedCollection<EVENT::ReconstructedParticle>
-             , TypedCollection<EVENT::TrackerHit>
-             , TypedCollection<EVENT::SimTrackerHit>
-             , TypedCollection<EVENT::LCRelation>
              , TypedCollection<EVENT::LCGenericObject>
+             , TypedCollection<EVENT::LCRelation>
+             , TypedCollection<EVENT::ReconstructedParticle>
+             , TypedCollection<EVENT::SimCalorimeterHit>
+             , TypedCollection<EVENT::SimTrackerHit>
              , TypedCollection<EVENT::Track>
+             , TypedCollection<EVENT::TrackerHit>
              , TypedCollection<EVENT::Vertex>>([](auto wrapped)
         {
         typedef typename decltype(wrapped)::type WrappedColl;
@@ -241,14 +242,15 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getRelatedToWeights", &UTIL::LCRelationNavigator::getRelatedToWeights);
 
     lciowrap.add_type<Parametric<TypeVar<1>>>("CastOperator")
-    .apply<CastOperator<EVENT::SimCalorimeterHit>
-         , CastOperator<EVENT::CalorimeterHit>
+    .apply<CastOperator<EVENT::CalorimeterHit>
+         , CastOperator<EVENT::Cluster>
+         , CastOperator<EVENT::LCGenericObject>
          , CastOperator<EVENT::MCParticle>
          , CastOperator<EVENT::ReconstructedParticle>
-         , CastOperator<EVENT::TrackerHit>
+         , CastOperator<EVENT::SimCalorimeterHit>
          , CastOperator<EVENT::SimTrackerHit>
-         , CastOperator<EVENT::LCGenericObject>
          , CastOperator<EVENT::Track>
+         , CastOperator<EVENT::TrackerHit>
          , CastOperator<EVENT::Vertex>>([](auto wrapped)
     {
         typedef typename decltype(wrapped)::type LCType;

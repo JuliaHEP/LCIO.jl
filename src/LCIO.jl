@@ -87,7 +87,9 @@ end
 # map from names stored in collection to actual types
 LCIOTypemap = Dict(
     "CalorimeterHit" => CalorimeterHit,
+    "Cluster" => Cluster,
 	"LCGenericObject" => LCGenericObject,
+    "LCRelation" => LCRelation,
 	"MCParticle" => MCParticle,
     "RawCalorimeterHit" => RawCalorimeterHit,
     "ReconstructedParticle" => ReconstructedParticle,
