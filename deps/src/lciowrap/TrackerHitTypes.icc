@@ -63,9 +63,8 @@ lciowrap.add_type<EVENT::TrackerData>("TrackerData")
 lciowrap.add_type<EVENT::TrackerRawData>("TrackerRawData")
     .method("getCellID0", &EVENT::TrackerRawData::getCellID0)
     .method("getCellID1", &EVENT::TrackerRawData::getCellID1)
-    .method("getTime", &EVENT::TrackerRawData::getTime);
-    //FIXME this needs a shortvec
-    // .method("getADCValues", &EVENT::TrackerRawData::getADCValues);
+    .method("getTime", &EVENT::TrackerRawData::getTime)
+    .method("getADCValues", &EVENT::TrackerRawData::getADCValues);
 
 lciowrap.add_type<EVENT::TrackerPulse>("TrackerPulse")
     .method("getCellID0", &EVENT::TrackerPulse::getCellID0)

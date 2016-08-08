@@ -77,11 +77,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
     lciowrap.method("at", [](const vector<int>* vec, size_t i) {
         return vec->at(i);
     });
-    // lciowrap.add_type<vector<short>>("ShortVec")
-    //     .method("size", &EVENT::ShortVec::size);
-    // lciowrap.method("at", [](const vector<short>* vec, size_t i) {
-    //     return vec->at(i);
-    // });
+    lciowrap.add_type<vector<short>>("ShortVec")
+        .method("size", &EVENT::ShortVec::size);
+    lciowrap.method("at", [](const vector<short>* vec, size_t i) {
+        return vec->at(i);
+    });
 
     lciowrap.add_type<EVENT::LCParameters>("LCParameters")
         .method("getIntVal", &EVENT::LCParameters::getIntVal)
@@ -217,14 +217,6 @@ JULIA_CPP_MODULE_BEGIN(registry)
         wrapped.method("getNumberOfElements", &WrappedColl::getNumberOfElements);
         wrapped.method("coll", &WrappedColl::coll);
     });
-
-    // lciowrap.add_type<UTIL::BitFieldValue>("BitFieldValue")
-    //     .constructor<long long &, const string, unsigned, int>()
-    //     .method("value", &UTIL::BitFieldValue::value)
-    //     .method("name", &UTIL::BitFieldValue::name)
-    //     .method("offset", &UTIL::BitFieldValue::offset)
-    //     .method("width", &UTIL::BitFieldValue::width)
-    //     .method("isSigned", &UTIL::BitFieldValue::isSigned);
 
     lciowrap.add_type<UTIL::BitField64>("BitField64")
         .constructor<const string&>()
