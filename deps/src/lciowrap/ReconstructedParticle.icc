@@ -33,14 +33,6 @@ lciowrap.method("getReferencePoint3", [](const EVENT::ReconstructedParticle* p, 
 lciowrap.method("getParticleIDUsed", [](){
     cerr << "not yet implemented" << endl;
 });
-lciowrap.method("getMomentum3", [](const EVENT::ReconstructedParticle* p, ArrayRef<double> mom)->bool {
-    const double* p3 = p->getMomentum();
-    if (not p3) {return false;}
-    mom[0] = p3[0];
-    mom[1] = p3[1];
-    mom[2] = p3[2];
-    return true;
-});
 
 lciowrap.add_type<EVENT::ReconstructedParticleVec>("ReconstructedParticleVec")
     .method("size", &EVENT::ReconstructedParticleVec::size);

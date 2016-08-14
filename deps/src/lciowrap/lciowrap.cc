@@ -243,7 +243,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
     {
         typedef typename decltype(wrapped)::type WrappedT;
         wrapped.template constructor<const EVENT::LCCollection*>();
-        wrapped.method("call", &WrappedT::operator());
+        wrapped.method(&WrappedT::operator());
     });
 
     lciowrap.add_type<UTIL::LCRelationNavigator>("LCRelNav")
