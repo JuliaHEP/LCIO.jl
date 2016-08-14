@@ -97,6 +97,7 @@ LCIOTypemap = Dict(
 	"SimTrackerHit" => SimTrackerHit,
 	"Track" => Track,
 	"TrackerHit" => TrackerHit,
+    "TrackerRawData" => TrackerRawData,
     "Vertex" => Vertex,
 )
 
@@ -171,6 +172,7 @@ end
 function getRelatedFromObjects(nav::LCRelationNavigator, obj)
     [CastOperator{nav.fromType}.cast(x) for x in getRelatedFromObjects(nav.relnav)]
 end
+
 # should work for all particle types
 function getP4(x)
     p3 = getMomentum(x)

@@ -209,6 +209,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
              , TypedCollection<EVENT::SimTrackerHit>
              , TypedCollection<EVENT::Track>
              , TypedCollection<EVENT::TrackerHit>
+             , TypedCollection<EVENT::TrackerRawData>
              , TypedCollection<EVENT::Vertex>>([](auto wrapped)
         {
         typedef typename decltype(wrapped)::type WrappedColl;
