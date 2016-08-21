@@ -25,8 +25,15 @@ for event in reader
     HcalBarrelHits = getCollection(event, "HcalBarrelHits")
     @test getTypeName(HcalBarrelHits) == "LCIO.SimCalorimeterHit"
     decode = CellIDDecoder(HcalBarrelHits)
+    l = length(HcalBarrelHits)
+    # getNumberOfElements should not be exported
+    @test l == LCIO.getNumberOfElements(HcalBarrelHits)
+    iHit = 0
     for h in HcalBarrelHits
         @test 0 <= decode(h)["layer"] <= 39
+        iHit += 1
     end
+    # test iteration -- julia counting vs. C counting
+    @test l == iHit
 end
 end

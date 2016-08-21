@@ -1,8 +1,8 @@
 __precompile__(false)
 module LCIO
 using CxxWrap
-import Base: getindex, start, done, next, length, +, convert
-export Vec, CalHit, getP4, getPosition, CellIDDecoder,
+import Base: getindex, start, done, next, length, convert
+export CalHit, getP4, getPosition, CellIDDecoder,
     getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
     getTypeName, # LCCollection
     getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, getMomentumAtEndpoint, getMass, getCharge, # MCParticle
@@ -22,21 +22,6 @@ wrap_module(_l_lciowrap)
 #     end
 # end
 
-immutable Vec
-	x::Cdouble
-	y::Cdouble
-	z::Cdouble
-	t::Cdouble
-end
-+(a::Vec, b::Vec) = Vec(a.x+b.x, a.y+b.y, a.z+b.z, a.t+b.t)
-
-immutable ThreeVec
-	x::Cdouble
-	y::Cdouble
-	z::Cdouble
-end
-+(a::ThreeVec, b::ThreeVec) = ThreeVec(a.x+b.x, a.y+b.y, a.z+b.z)
-
 immutable CalHit
 	x::Cfloat
 	y::Cfloat
@@ -53,7 +38,7 @@ next(it::StdVecs, i) = (it[i], i+1)
 done(it::StdVecs, i) = i > length(it)
 length(it::StdVecs) = size(it)
 # 'at' uses C counting, 0..n-1
-getindex(it::StdVecs    , i) = at(it, i-1)
+getindex(it::StdVecs, i) = at(it, i-1)
 
 start(it::LCReader) = getNumberOfEvents(it)
 next(it::LCReader, state) = readNextEvent(it), state-1
@@ -83,7 +68,6 @@ function open(f::Function, fn::AbstractString)
     end
 end
 
-
 # map from names stored in collection to actual types
 LCIOTypemap = Dict(
     "CalorimeterHit" => CalorimeterHit,
@@ -101,10 +85,14 @@ LCIOTypemap = Dict(
     "Vertex" => Vertex,
 )
 
-start(it::TypedCollection) = length(it)
-done(it::TypedCollection, i) = i <= 0
-next{T}(it::TypedCollection{T}, i) = getElementAt(it, i-1), i-1
+# This version of the iteration runs length() multiple times during the iteration
+# if this becomes a speed problem, the length could be memoized, or iteration order could be inverted
+start(it::TypedCollection) = convert(UInt64, 1)
+done(it::TypedCollection, i) = i > length(it)
+next{T}(it::TypedCollection{T}, i) = it[i], i+1
 length(it::TypedCollection) = getNumberOfElements(it)
+# getindex uses Julia counting, getElementAt uses C counting
+getindex(it::TypedCollection, i) = getElementAt(it, convert(UInt64, i-1))
 
 CellIDDecoder{T}(t::TypedCollection{T}) = CellIDDecoder{T}(coll(t))
 
@@ -177,13 +165,10 @@ end
 function getP4(x)
     p3 = getMomentum(x)
     E = getEnergy(x)
-    return Vec(p3[1], p3[2], p3[3], E)
+    return (E, p3)
 end
 
-function getP3(x)
-    p = getPosition(x)
-    return ThreeVec(p...)
-end
+getP3(x) = getPosition(x)
 
 # converters to keep older code working
 typealias CalHits Union{SimCalorimeterHit, CalorimeterHit, RawCalorimeterHit}

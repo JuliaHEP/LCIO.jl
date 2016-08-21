@@ -18,8 +18,7 @@ Installation Instructions
 bash
 cd /path/to/lcio
 source setup.sh
-julia -e 'Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap"); Pkg.build("CxxWrap")'
-julia -e 'Pkg.clone("https://github.com/jstrube/LCIO.jl"); Pkg.build("LCIO")'
+julia -e 'Pkg.clone("https://github.com/jstrube/LCIO.jl"); Pkg.resolve(); Pkg.build("LCIO")'
 ```
 
 Philosophy
@@ -29,7 +28,7 @@ Examples:
  - All collections are typed, no casting necessary
  - Methods that return a `float*` or `double*` in the C++ API return a `float64[]` instead.
  - Many of the methods on the C++ side returning pointers can return `nullptr`, so need to be wrapped in `if` clauses. The way to deal with this on the julia side is to use something like the following syntax:
- 
+
  ```
  ok, value = getReferencePoint(particle)
  if ok
