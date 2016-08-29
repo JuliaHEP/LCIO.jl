@@ -10,7 +10,7 @@ Prerequisites
 -------------
  - The julia programming language: http://julialang.org/
  - A compiler that accepts the --std=c++-14 flag
- - An existing LCIO installation (requirement might be removed in the future)
+ - An existing LCIO installation will be used if the environment variable "LCIO" is set. Otherwise, LCIO will be built from source
 
 Installation Instructions
 -------------------------
