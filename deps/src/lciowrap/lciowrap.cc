@@ -177,7 +177,8 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getCollectionNames", &EVENT::LCEvent::getCollectionNames)
         .method("getDetectorName", &EVENT::LCEvent::getDetectorName)
         .method("getEventNumber", &EVENT::LCEvent::getEventNumber)
-        .method("getRunNumber", &EVENT::LCEvent::getRunNumber);
+        .method("getRunNumber", &EVENT::LCEvent::getRunNumber)
+        .method("getParameters", &EVENT::LCEvent::getParameters);
 
     // LCReader
     lciowrap.add_type<IO::LCReader>("LCReader")
