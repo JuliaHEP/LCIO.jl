@@ -10,15 +10,19 @@ Prerequisites
 -------------
  - The julia programming language: http://julialang.org/
  - A compiler that accepts the --std=c++-14 flag
- - An existing LCIO installation will be used if the environment variable "LCIO" is set. Otherwise, LCIO will be built from source
+ - An existing LCIO installation will be used if the environment variable "LCIO" is set. 
+```
+cd /path/to/lcio
+source setup.sh
+```
+Otherwise, LCIO will be built from source.
+
 
 Installation Instructions
 -------------------------
 ```
 bash
-cd /path/to/lcio
-source setup.sh
-julia -e 'Pkg.clone("https://github.com/jstrube/LCIO.jl"); Pkg.resolve(); Pkg.build("LCIO")'
+julia -e 'Pkg.add("LCIO")'
 ```
 
 Philosophy
