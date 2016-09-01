@@ -68,6 +68,7 @@ function open(f::Function, fn::AbstractString)
     end
 end
 
+
 # map from names stored in collection to actual types
 LCIOTypemap = Dict(
     "CalorimeterHit" => CalorimeterHit,
@@ -105,6 +106,23 @@ function getCollection(event, collectionName)
 	collectionType = getTypeName(collection)
 	return TypedCollection{LCIOTypemap[collectionType]}(collection)
 end
+
+# the LCStdHepRdr implementation in C++ is not consistent with the LCIO reader
+# this is me trying to make things a bit better
+start(it::LCStdHepRdr) = length(it)
+next(it::LCStdHepRdr, state) = readNextEvent(it), state-1
+done(it::LCStdHepRdr, state) = state < 1
+length(it::LCStdHepRdr) = getNumberOfEvents(it)
+
+function openStdhep(f::Function, fn::AbstractString)
+    reader = LCStdHepRdr(bytestring(fn))
+    f(reader)
+end
+
+# readNextEvent is only called by the iterator, it is not part of the C++ API
+# since it doesn't exist on the original LCStdHepRdr, we can make use of the fact that
+# stdhep files only contain one specific type of collection: MCParticle
+readNextEvent(r::LCStdHepRdr) = TypedCollection{LCIOTypemap["MCParticle"]}(readEvent(r))
 
 function getPosition(hit)
     p3 = Array{Float64,1}(3)

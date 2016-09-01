@@ -37,3 +37,17 @@ for event in reader
     @test l == iHit
 end
 end
+
+
+LCIO.openStdhep("test.stdhep") do reader
+    iEvent = 0
+    for event in reader
+        iEvent += 1
+        iParticle = 0
+        for particle in event
+            iParticle += 1
+        end
+        @test iParticle == length(event)
+    end
+    @test iEvent == length(reader)
+end

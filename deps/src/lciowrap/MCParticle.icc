@@ -65,3 +65,14 @@ lciowrap.method("getMomentumAtEndpoint3", [](const EVENT::MCParticle* p, ArrayRe
     p3[2] = mom[2];
     return true;
 });
+
+// And some methods for an stdhep reader
+lciowrap.add_type<IMPL::LCCollectionVec>("LCCollectionVec")
+    .method("getTypeName", &IMPL::LCCollectionVec::getTypeName)
+    .method("getParameters", &IMPL::LCCollectionVec::getParameters)
+    .method("getElementAt", &IMPL::LCCollectionVec::getElementAt);
+
+lciowrap.add_type<UTIL::LCStdHepRdr>("LCStdHepRdr")
+    .constructor<const char*>()
+    .method("getNumberOfEvents", &UTIL::LCStdHepRdr::getNumberOfEvents)
+    .method("readEvent", &UTIL::LCStdHepRdr::readEvent);

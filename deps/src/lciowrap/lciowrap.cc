@@ -26,6 +26,9 @@
 #include "UTIL/CellIDDecoder.h"
 #include "UTIL/LCRelationNavigator.h"
 
+#include <IMPL/LCCollectionVec.h>
+#include <UTIL/LCStdHepRdr.h>
+
 using namespace std;
 using namespace cxx_wrap;
 
@@ -37,6 +40,9 @@ struct TypedCollection
 {
     EVENT::LCCollection* m_coll;
     TypedCollection(EVENT::LCCollection* collection) {
+        m_coll = collection;
+    }
+    TypedCollection(IMPL::LCCollectionVec* collection) {
         m_coll = collection;
     }
     inline T* getElementAt(size_t i) {
@@ -215,6 +221,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         {
         typedef typename decltype(wrapped)::type WrappedColl;
         wrapped.template constructor<EVENT::LCCollection*>();
+        wrapped.template constructor<IMPL::LCCollectionVec*>();
         wrapped.method("getElementAt", &WrappedColl::getElementAt);
         wrapped.method("getNumberOfElements", &WrappedColl::getNumberOfElements);
         wrapped.method("coll", &WrappedColl::coll);
