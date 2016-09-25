@@ -81,11 +81,11 @@ for i in 1:10
 #--------------- create MCParticle -------------------
     mcp = LCIO.MCParticleImpl()
     LCIO.setGeneratorStatus(mcp, 1)
-    LCIO.setMass(mcp, mass )
-    LCIO.setPDG(mcp, pdg )
-    LCIO.setMomentum(mcp, momentum )
-    LCIO.setCharge(mcp, charge )
+    LCIO.setMass(mcp, mass)
+    LCIO.setPDG(mcp, pdg)
+    LCIO.setMomentum(mcp, momentum)
+    LCIO.setCharge(mcp, charge)
     LCIO.addElement(col, mcp)
-    LCIO.writeEvent(wrt, evt )
+    LCIO.writeEvent(wrt, evt)
 end
 LCIO.close(wrt)
