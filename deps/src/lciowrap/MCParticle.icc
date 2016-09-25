@@ -66,13 +66,21 @@ lciowrap.method("getMomentumAtEndpoint3", [](const EVENT::MCParticle* p, ArrayRe
     return true;
 });
 
-// And some methods for an stdhep reader
-lciowrap.add_type<IMPL::LCCollectionVec>("LCCollectionVec")
-    .method("getTypeName", &IMPL::LCCollectionVec::getTypeName)
-    .method("getParameters", &IMPL::LCCollectionVec::getParameters)
-    .method("getElementAt", &IMPL::LCCollectionVec::getElementAt);
-
 lciowrap.add_type<UTIL::LCStdHepRdr>("LCStdHepRdr")
     .constructor<const char*>()
     .method("getNumberOfEvents", &UTIL::LCStdHepRdr::getNumberOfEvents)
     .method("readEvent", &UTIL::LCStdHepRdr::readEvent);
+
+lciowrap.add_type<IMPL::MCParticleImpl>("MCParticleImpl")
+    .method("setGeneratorStatus", &IMPL::MCParticleImpl::setGeneratorStatus)
+    .method("setMass", &IMPL::MCParticleImpl::setMass)
+    .method("setPDG", &IMPL::MCParticleImpl::setPDG)
+    .method("setCharge", &IMPL::MCParticleImpl::setCharge);
+lciowrap.method("setMomentum", [](IMPL::MCParticleImpl* mcp, const ArrayRef<double> p3) {
+    double mom[] = {p3[0], p3[1], p3[2]};
+    mcp->setMomentum(mom);
+});
+
+lciowrap.method("addElement", [](IMPL::LCCollectionVec* coll, IMPL::MCParticleImpl* mcp) {
+    coll->addElement(mcp);
+});

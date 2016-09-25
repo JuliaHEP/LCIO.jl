@@ -29,6 +29,8 @@ immutable CalHit
 	E::Cfloat
 end
 
+const MCPARTICLE = "MCParticle"
+
 # iteration over std vectors
 typealias StdVecs Union{ClusterVec, CalorimeterHitVec, TrackVec, StringVec}
 
@@ -115,7 +117,7 @@ done(it::LCStdHepRdr, state) = state < 1
 length(it::LCStdHepRdr) = getNumberOfEvents(it)
 
 function openStdhep(f::Function, fn::AbstractString)
-    reader = LCStdHepRdr(bytestring(fn))
+    reader = LCStdHepRdr(string(fn))
     f(reader)
 end
 

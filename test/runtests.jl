@@ -38,7 +38,7 @@ for event in reader
 end
 end
 
-
+# test the stdhep reader
 LCIO.openStdhep("test.stdhep") do reader
     iEvent = 0
     for event in reader
@@ -51,3 +51,41 @@ LCIO.openStdhep("test.stdhep") do reader
     end
     @test iEvent == length(reader)
 end
+
+# test creating a new file and writing out a particle
+wrt = LCIO.createLCWriter()
+
+LCIO.open(wrt, "writeTest.slcio", 0)
+run = LCIO.LCRunHeaderImpl()
+LCIO.setRunNumber(run, 0)
+LCIO.setValue(LCIO.parameters(run),"Purpose","runTest")
+LCIO.setValue(LCIO.parameters(run), "intval", 1 )
+LCIO.setValue(LCIO.parameters(run), "floatval", 3.14f0)
+LCIO.writeRunHeader(wrt, run)
+p = 5.0
+pdg = -13
+charge = +1.f0
+mass =  0.105658f0
+theta = 85./180.f0 * pi
+for i in 1:10
+    col = LCIO.LCCollectionVec(LCIO.MCPARTICLE)
+    evt = LCIO.LCEventImpl()
+    LCIO.setEventNumber(evt, i)
+    LCIO.addCollection(evt, col, "genParticles")
+    phi = rand() * 2pi
+    energy = sqrt(mass^2 + p^2)
+    px = p * cos(phi) * sin(theta)
+    py = p * sin(phi) * sin(theta)
+    pz = p * cos(theta)
+    momentum  = [ px, py, pz ]
+#--------------- create MCParticle -------------------
+    mcp = LCIO.MCParticleImpl()
+    LCIO.setGeneratorStatus(mcp, 1)
+    LCIO.setMass(mcp, mass )
+    LCIO.setPDG(mcp, pdg )
+    LCIO.setMomentum(mcp, momentum )
+    LCIO.setCharge(mcp, charge )
+    LCIO.addElement(col, mcp)
+    LCIO.writeEvent(wrt, evt )
+end
+LCIO.close(wrt)

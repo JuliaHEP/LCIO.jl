@@ -20,7 +20,11 @@
 #include "EVENT/TrackerRawData.h"
 #include "EVENT/TrackerHit.h"
 #include "EVENT/Vertex.h"
+#include "IMPL/LCRunHeaderImpl.h"
+#include "IMPL/LCEventImpl.h"
+#include "IMPL/MCParticleImpl.h"
 #include "IO/LCReader.h"
+#include "IO/LCWriter.h"
 #include "IOIMPL/LCFactory.h"
 #include "UTIL/BitField64.h"
 #include "UTIL/CellIDDecoder.h"
@@ -88,6 +92,13 @@ JULIA_CPP_MODULE_BEGIN(registry)
     lciowrap.method("at", [](const vector<short>* vec, size_t i) {
         return vec->at(i);
     });
+    // And some methods for an stdhep reader
+    lciowrap.add_type<IMPL::LCCollectionVec>("LCCollectionVec")
+        .constructor<const string&>()
+        .method("getTypeName", &IMPL::LCCollectionVec::getTypeName)
+        .method("getParameters", &IMPL::LCCollectionVec::getParameters)
+        .method("getElementAt", &IMPL::LCCollectionVec::getElementAt)
+        .method("getNumberOfElements", &IMPL::LCCollectionVec::getNumberOfElements);
 
     lciowrap.add_type<EVENT::LCParameters>("LCParameters")
         .method("getIntVal", &EVENT::LCParameters::getIntVal)
@@ -102,6 +113,16 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getNInt", &EVENT::LCParameters::getNInt)
         .method("getNFloat", &EVENT::LCParameters::getNFloat)
         .method("getNString", &EVENT::LCParameters::getNString);
+    lciowrap.method("setValue", [](EVENT::LCParameters* parms, const std::string& key, int value) {
+        return parms->setValue(key, value);
+    });
+    lciowrap.method("setValue", [](EVENT::LCParameters* parms, const std::string& key, float value) {
+        return parms->setValue(key, value);
+    });
+    lciowrap.method("setValue", [](EVENT::LCParameters* parms, const std::string& key, const std::string& value) {
+        return parms->setValue(key, value);
+    });
+
 
     lciowrap.add_type<EVENT::LCRunHeader>("LCRunHeader")
         .method("getRunNumber", &EVENT::LCRunHeader::getRunNumber)
@@ -205,6 +226,23 @@ JULIA_CPP_MODULE_BEGIN(registry)
         reader->close();
     });
 
+    lciowrap.add_type<IO::LCWriter>("LCWriter")
+        .method("setCompressionLevel", &IO::LCWriter::setCompressionLevel)
+        .method("close", &IO::LCWriter::close)
+        .method("flush", &IO::LCWriter::flush);
+        // .method("writeRunHeader", &IO::LCWriter::writeRunHeader)
+        // .method("writeEvent", &IO::LCWriter::writeEvent);
+    lciowrap.method("open", [](IO::LCWriter* writer, const std::string& filename, int writeMode) {
+        writer->open(filename, writeMode);
+    });
+    lciowrap.method("createLCWriter", [](){
+        return IOIMPL::LCFactory::getInstance()->createLCWriter();
+    });
+    lciowrap.method("deleteLCWriter", [](IO::LCWriter* writer){
+        delete writer;
+    });
+
+
     lciowrap.add_type<Parametric<TypeVar<1>>>("TypedCollection")
         .apply<TypedCollection<EVENT::CalorimeterHit>
              , TypedCollection<EVENT::Cluster>
@@ -277,6 +315,29 @@ JULIA_CPP_MODULE_BEGIN(registry)
     {
         typedef typename decltype(wrapped)::type LCType;
         wrapped.method("cast", &LCType::cast);
+    });
+
+    lciowrap.add_type<IMPL::LCRunHeaderImpl>("LCRunHeaderImpl")
+        .method("setRunNumber", &IMPL::LCRunHeaderImpl::setRunNumber)
+        .method("setDetectorName", &IMPL::LCRunHeaderImpl::setDetectorName)
+        .method("setDescription", &IMPL::LCRunHeaderImpl::setDescription)
+        .method("parameters", &IMPL::LCRunHeaderImpl::parameters);
+    lciowrap.method("writeRunHeader", [](IO::LCWriter* writer, const EVENT::LCRunHeader* hdr){
+        writer->writeRunHeader(hdr);
+    });
+    lciowrap.method("writeRunHeader", [](IO::LCWriter* writer, const IMPL::LCRunHeaderImpl* hdr) {
+        writer->writeRunHeader(hdr);
+    });
+    lciowrap.method("writeEvent", [](IO::LCWriter* writer, const IMPL::LCEventImpl* evt) {
+        writer->writeEvent(evt);
+    });
+
+    lciowrap.add_type<IMPL::LCEventImpl>("LCEventImpl")
+        .method("addCollection", &IMPL::LCEventImpl::addCollection)
+        .method("setEventNumber", &IMPL::LCEventImpl::setEventNumber)
+        .method("getCollectionNames", &IMPL::LCEventImpl::getCollectionNames);
+    lciowrap.method("addCollection", [](IMPL::LCEventImpl* event, IMPL::LCCollectionVec* vec, const std::string& name) {
+        event->addCollection(vec, name);
     });
 
 
