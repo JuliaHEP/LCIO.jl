@@ -21,6 +21,10 @@ genopt = "Unix Makefiles"
 
 # LCIOConfig.cmake needs to be available. If not there, check out the LCIO source
 # unfortunately, this only works on POSIX at the moment
+# remove the previous libraries -- always build at least the library
+isfile(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix")) && rm(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix"))
+isfile(joinpath(lciowrap_builddir, "$(lib_prefix)lciowrap.$lib_suffix")) && rm(joinpath(lciowrap_builddir, "$(lib_prefix)lciowrap.$lib_suffix"))
+rm(joinpath(lciowrap_builddir, "CMakeFiles"), force=true, recursive=true)
 provides(BuildProcess,
   (@build_steps begin
     FileRule(joinpath(lcio_srcdir, "LCIOConfig.cmake"), @build_steps begin
