@@ -2,7 +2,7 @@
 *.jl.*.cov
 *.jl.mem
 *~
+examples/
 deps/deps.jl
 deps/usr
 deps/builds
-
