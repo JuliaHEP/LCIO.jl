@@ -21,15 +21,15 @@ matrix:
 notifications:
   email: false
 install:
-  - echo "no separate install step needed"
+  - if [ ! -e ${HOME}/lcio_bindir ]; then /bin/sh deps/install_lcio.sh; fi
 script:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
+  - export LCIO=${HOME}/lcio_bindir
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
-  - julia -e 'Pkg.free("LCIO"); Pkg.rm("LCIO")'
-  - julia -e 'Pkg.clone(pwd()); Pkg.resolve(); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
+  - julia -e 'Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap")'
+  - julia -e 'Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
 cache:
   directories:
   - ${HOME}/lcio_bindir
-  - ${HOME}/.julia
