@@ -38,6 +38,7 @@ provides(BuildProcess,
             `make install`
         end
     end)
+    CreateDirectory(lciowrap_builddir)
     @build_steps begin
       ChangeDirectory(lciowrap_builddir)
       FileRule(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix"), @build_steps begin

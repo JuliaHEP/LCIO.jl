@@ -21,6 +21,8 @@ matrix:
 notifications:
   email: false
 install:
+  - export CXX=${MYCXX}
+  - export CC=${MYCC}
   - if [ ! -e ${HOME}/lcio_bindir/lcio/CMakeLists.txt ]; then ./deps/install_lcio.sh; fi
 script:
   - export CXX=${MYCXX}
