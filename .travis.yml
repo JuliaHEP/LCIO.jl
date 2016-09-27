@@ -21,11 +21,11 @@ matrix:
 notifications:
   email: false
 install:
-  - if [ ! -e ${HOME}/lcio_bindir/CMakeLists.txt ]; then rmdir ${HOME}/lcio_bindir; ./deps/install_lcio.sh; fi
+  - if [ ! -e ${HOME}/lcio_bindir/lcio/CMakeLists.txt ]; then ./deps/install_lcio.sh; fi
 script:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
-  - export LCIO=${HOME}/lcio_bindir
+  - export LCIO=${HOME}/lcio_bindir/lcio
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
   - julia -e 'Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap")'
