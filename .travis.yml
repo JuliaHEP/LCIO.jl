@@ -21,7 +21,7 @@ matrix:
 notifications:
   email: false
 install:
-  - if [ ! -e ${HOME}/lcio_bindir ]; then /bin/sh deps/install_lcio.sh; fi
+  - if [ ! -d ${HOME}/lcio_bindir ]; then ./deps/install_lcio.sh; fi
 script:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
