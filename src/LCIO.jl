@@ -206,4 +206,19 @@ function convert(::Type(CalHit), h::CalHits)
     return CalHit(p[1], p[2], p[3], E)
 end
 
+function printParameters(p::LCParameters)
+    println("strings:")
+    for k in getStringKeys(p, StringVec())
+        println(k, "\t", getStringVal(p, k))
+    end
+    println("floats:")
+    for k in getFloatKeys(p, StringVec())
+        println(k, "\t", getFloatVal(p, k))
+    end
+    println("ints:")
+    for k in getIntKeys(p, StringVec())
+        println(k, "\t", getIntVal(p, k))
+    end
+end
+
 end

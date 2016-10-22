@@ -215,7 +215,8 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getDetectorName", &EVENT::LCEvent::getDetectorName)
         .method("getEventNumber", &EVENT::LCEvent::getEventNumber)
         .method("getRunNumber", &EVENT::LCEvent::getRunNumber)
-        .method("getParameters", &EVENT::LCEvent::getParameters);
+        .method("getParameters", &EVENT::LCEvent::getParameters)
+        .method("getWeight", &EVENT::LCEvent::getWeight);
 
     lciowrap.add_type<IMPL::LCEventImpl>("LCEventImpl", cxx_wrap::julia_type<EVENT::LCEvent>())
         .method("addCollection", &IMPL::LCEventImpl::addCollection)
@@ -225,10 +226,15 @@ JULIA_CPP_MODULE_BEGIN(registry)
     //     event->addCollection(vec, name);
     // });
 
-
-    // LCReader
     lciowrap.add_type<IO::LCReader>("LCReader")
-      .method("getNumberOfEvents", &IO::LCReader::getNumberOfEvents);
+      .method("getNumberOfEvents", &IO::LCReader::getNumberOfEvents)
+      .method("getNumberOfRuns", &IO::LCReader::getNumberOfRuns);
+    lciowrap.method("readNextEvent", [](IO::LCReader* reader) {
+        return reader->readNextEvent();
+    });
+    lciowrap.method("readNextRunHeader", [](IO::LCReader* reader) {
+        return reader->readNextRunHeader();
+    });
     lciowrap.method("createLCReader", [](){
         return IOIMPL::LCFactory::getInstance()->createLCReader();
     });
@@ -237,9 +243,6 @@ JULIA_CPP_MODULE_BEGIN(registry)
     });
     lciowrap.method("openFile", [](IO::LCReader* reader, const std::string& filename) {
         reader->open(filename);
-    });
-    lciowrap.method("readNextEvent", [](IO::LCReader* reader) {
-        return reader->readNextEvent();
     });
     lciowrap.method("closeFile", [](IO::LCReader* reader) {
         reader->close();
