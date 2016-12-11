@@ -26,14 +26,6 @@ isfile(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix")) 
 isfile(joinpath(lciowrap_builddir, "$(lib_prefix)lciowrap.$lib_suffix")) && rm(joinpath(lciowrap_builddir, "$(lib_prefix)lciowrap.$lib_suffix"))
 rm(joinpath(lciowrap_builddir, "CMakeFiles"), force=true, recursive=true)
 
-# let's make sure the right compiler is used: Default:use CXX and CC, if set, otherwise fall back to g++ and gcc
-if ! haskey(ENV, "CXX")
-    ENV["CXX"] = "g++"
-end
-if ! haskey(ENV, "CC")
-    ENV["CC"] = "gcc"
-end
-
 provides(BuildProcess,
   (@build_steps begin
     FileRule(joinpath(lcio_srcdir, "LCIOConfig.cmake"), @build_steps begin
@@ -51,8 +43,9 @@ provides(BuildProcess,
     @build_steps begin
       ChangeDirectory(lciowrap_builddir)
       FileRule(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix"), @build_steps begin
-      	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DLIBDIR_SUFFIX="$libdir_opt" -DLCIO_INSTALLDIR="$lcio_srcdir" $lciowrap_srcdir -DCMAKE_CXX_COMPILER="$(ENV["CXX"])" -DCMAKE_C_COMPILER="$(ENV["CC"])"`
-      	`cmake --build . --config Release --target install`
+      	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DLIBDIR_SUFFIX="$libdir_opt" -DLCIO_INSTALLDIR="$lcio_srcdir" $lciowrap_srcdir`
+      	`make`
+        `make install`
       end)
     end
   end),liblciowrap)
