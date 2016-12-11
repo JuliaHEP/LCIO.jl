@@ -26,14 +26,6 @@ isfile(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix")) 
 isfile(joinpath(lciowrap_builddir, "$(lib_prefix)lciowrap.$lib_suffix")) && rm(joinpath(lciowrap_builddir, "$(lib_prefix)lciowrap.$lib_suffix"))
 rm(joinpath(lciowrap_builddir, "CMakeFiles"), force=true, recursive=true)
 
-# let's make sure the right compiler is used: Default:use CXX and CC, if set, otherwise fall back to g++ and gcc
-if ! haskey(ENV, "CXX")
-    ENV["CXX"] = "g++"
-end
-if ! haskey(ENV, "CC")
-    ENV["CC"] = "gcc"
-end
-
 provides(BuildProcess,
   (@build_steps begin
     FileRule(joinpath(lcio_srcdir, "LCIOConfig.cmake"), @build_steps begin
