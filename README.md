@@ -9,7 +9,7 @@ This is a package for reading the LCIO file format, used for studies of the Inte
 Prerequisites
 -------------
  - The julia programming language: http://julialang.org/
- - A compiler that accepts the --std=c++-14 flag
+ - A compiler that accepts the --std=c++-14 flag. Set the CXX and CC environment variables if this is different from your default compiler.
  - An existing LCIO installation will be used if the environment variable "LCIO" is set. 
 ```
 cd /path/to/lcio
@@ -24,6 +24,14 @@ Installation Instructions
 bash
 julia -e 'Pkg.add("LCIO")'
 ```
+
+If you want to get the latest version (which might have newer features (and bugs) than the latest release), you can run
+```
+Pkg.checkout("LCIO")
+Pkg.build("LCIO")
+```
+from the julia prompt; after the `Pkg.add` command.
+
 
 Philosophy
 ----------
