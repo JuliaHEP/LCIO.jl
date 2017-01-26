@@ -14,6 +14,10 @@ LCIO.iterate("test.slcio") do event
         else
             @test abs(getEnergy(p)^2 - sum(momentum.^2)) < 1e-12
         end
+        parentList = getParents(p)
+        for parent in parentList
+            @test getEnergy(parent) > 0
+        end
     end
 end
 
