@@ -32,7 +32,7 @@ end
 const MCPARTICLE = "MCParticle"
 
 # iteration over std vectors
-typealias StdVecs Union{ClusterVec, CalorimeterHitVec, TrackVec, StringVec}
+typealias StdVecs Union{ClusterVec, CalorimeterHitVec, TrackVec, StringVec, MCParticleVec}
 
 # uses Julia counting, 1..n
 start(it::StdVecs) = convert(UInt64, 1)
