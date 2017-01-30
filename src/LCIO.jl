@@ -119,7 +119,9 @@ length(it::LCStdHepRdr) = getNumberOfEvents(it)
 
 function openStdhep(f::Function, fn::AbstractString)
     reader = LCStdHepRdr(string(fn))
-    f(reader)
+    try
+	f(reader)
+    end
 end
 
 # readNextEvent is only called by the iterator, it is not part of the C++ API
