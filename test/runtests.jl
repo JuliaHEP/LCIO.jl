@@ -23,7 +23,9 @@ end
 
 # test that everything is closed and opened properly
 LCIO.open("test.slcio") do reader
+iEvent = 0
 for event in reader
+    iEvent += 1
     @test length(getCollectionNames(event)) == 23
     @test getDetectorName(event) == "sidloi3_scint1x1"
     HcalBarrelHits = getCollection(event, "HcalBarrelHits")
@@ -40,6 +42,7 @@ for event in reader
     # test iteration -- julia counting vs. C counting
     @test l == iHit
 end
+@test iEvent == length(reader)
 end
 
 # test the stdhep reader

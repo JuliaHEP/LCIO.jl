@@ -44,7 +44,7 @@ getindex(it::StdVecs, i) = at(it, i-1)
 
 start(it::LCReader) = getNumberOfEvents(it)
 next(it::LCReader, state) = readNextEvent(it), state-1
-done(it::LCReader, state) = state <= 1
+done(it::LCReader, state) = state < 1
 length(it::LCReader) = getNumberOfEvents(it)
 
 function iterate(f::Function, fn::AbstractString)
@@ -119,7 +119,9 @@ length(it::LCStdHepRdr) = getNumberOfEvents(it)
 
 function openStdhep(f::Function, fn::AbstractString)
     reader = LCStdHepRdr(string(fn))
-    f(reader)
+    try
+	f(reader)
+    end
 end
 
 # readNextEvent is only called by the iterator, it is not part of the C++ API
