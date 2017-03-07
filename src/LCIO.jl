@@ -110,12 +110,18 @@ function getCollection(event, collectionName)
 	return TypedCollection{LCIOTypemap[collectionType]}(collection)
 end
 
+type LCStdHepRdr
+    r::_LCStdHepRdrCpp
+    e::LCEventImpl
+end
+LCStdHepRdr(filename) = LCStdHepRdr(_LCStdHepRdrCpp(filename), LCEventImpl())
+
 # the LCStdHepRdr implementation in C++ is not consistent with the LCIO reader
 # this is me trying to make things a bit better
-start(it::LCStdHepRdr) = length(it)
-next(it::LCStdHepRdr, state) = readNextEvent(it), state-1
+start(it::LCStdHepRdr) = length(it.r)
+next(it::LCStdHepRdr, state) = readNextEvent(it.r), state-1
 done(it::LCStdHepRdr, state) = state < 1
-length(it::LCStdHepRdr) = getNumberOfEvents(it)
+length(it::LCStdHepRdr) = getNumberOfEvents(it.r)
 
 function openStdhep(f::Function, fn::AbstractString)
     reader = LCStdHepRdr(string(fn))
@@ -124,10 +130,11 @@ function openStdhep(f::Function, fn::AbstractString)
     end
 end
 
-# readNextEvent is only called by the iterator, it is not part of the C++ API
-# since it doesn't exist on the original LCStdHepRdr, we can make use of the fact that
 # stdhep files only contain one specific type of collection: MCParticle
-readNextEvent(r::LCStdHepRdr) = TypedCollection{LCIOTypemap["MCParticle"]}(readEvent(r))
+function readNextEvent(r::LCStdHepRdr)
+    updateNextEvent(r.r, r.e)
+    getCollection(r.e, "MCParticle")
+end
 
 function getPosition(hit)
     p3 = Array{Float64,1}(3)

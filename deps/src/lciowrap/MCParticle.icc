@@ -66,10 +66,17 @@ lciowrap.method("getMomentumAtEndpoint3", [](const EVENT::MCParticle* p, ArrayRe
     return true;
 });
 
-lciowrap.add_type<UTIL::LCStdHepRdr>("LCStdHepRdr")
+// This is the C++ implementation
+// We're giving this an obscure name, because the
+// Julia implementation needs to carry around the default
+// event that can be updated in the iteration.
+// Otherwise, readEvent returns a new collection every time that
+// would have to be deleted by hand
+lciowrap.add_type<UTIL::LCStdHepRdr>("_LCStdHepRdrCpp")
     .constructor<const char*>()
     .method("getNumberOfEvents", &UTIL::LCStdHepRdr::getNumberOfEvents)
-    .method("readEvent", &UTIL::LCStdHepRdr::readEvent);
+    .method("readEvent", &UTIL::LCStdHepRdr::readEvent)
+    .method("updateNextEvent", &UTIL::LCStdHepRdr::updateNextEvent);
 
 lciowrap.add_type<IMPL::MCParticleImpl>("MCParticleImpl")
     .method("setGeneratorStatus", &IMPL::MCParticleImpl::setGeneratorStatus)
