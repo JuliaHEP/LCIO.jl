@@ -23,11 +23,11 @@ notifications:
 install:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
-  - if [ ! -e ${HOME}/lcio_bindir/lcio/CMakeLists.txt ]; then ./deps/install_lcio.sh; fi
+  - if [[ ! -e ${HOME}/lcio/CMakeLists.txt ]]; then ./deps/install_lcio.sh "02-07-04"; fi
 script:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
-  - export LCIO=${HOME}/lcio_bindir/lcio
+  - export LCIO=${HOME}/LCIO
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
   - julia -e 'Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap")'

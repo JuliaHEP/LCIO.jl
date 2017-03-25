@@ -29,6 +29,7 @@
 #include "UTIL/BitField64.h"
 #include "UTIL/CellIDDecoder.h"
 #include "UTIL/LCRelationNavigator.h"
+#include "UTIL/LCTrackerConf.h"
 
 #include <IMPL/LCCollectionVec.h>
 #include <UTIL/LCStdHepRdr.h>
@@ -72,6 +73,34 @@ struct CastOperator
 
 JULIA_CPP_MODULE_BEGIN(registry)
     cxx_wrap::Module& lciowrap = registry.create_module("LCIO");
+    lciowrap.add_type<UTIL::LCTrackerCellID>("LCTrackerCellID");
+    lciowrap.method("subdet", [](const UTIL::LCTrackerCellID& parms) {
+            return parms.subdet();
+    });
+    lciowrap.method("side", [](const UTIL::LCTrackerCellID& parms) {
+            return parms.side();
+    });
+    lciowrap.method("layer", [](const UTIL::LCTrackerCellID& parms) {
+            return parms.layer();
+    });
+    lciowrap.method("module", [](const UTIL::LCTrackerCellID& parms) {
+            return parms.module();
+    });
+    lciowrap.method("sensor", [](const UTIL::LCTrackerCellID& parms) {
+            return parms.sensor();
+    });
+    lciowrap.method("valueString", [](const UTIL::LCTrackerCellID& parms, unsigned val) {
+            return parms.valueString(val);
+    });
+    lciowrap.method("encoding_string", [](const UTIL::LCTrackerCellID& parms) {
+            return parms.encoding_string();
+    });
+    lciowrap.method("set_encoding_string", [](UTIL::LCTrackerCellID* parms, const std::string& value) {
+            return parms->set_encoding_string(value);
+    });
+    lciowrap.method("setAccessed", [](UTIL::LCTrackerCellID* parms) {
+            return parms->setAccessed();
+    });
     lciowrap.add_type<vector<string>>("StringVec")
         .method("size", &EVENT::StringVec::size);
     lciowrap.method("at", [](const vector<string>* vec, size_t i) {
