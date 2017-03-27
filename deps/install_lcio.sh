@@ -4,13 +4,13 @@ if [[ $# -ge 1 ]]
 then
 	LCIOVER=${1}
 fi
-if [[ ! -e "LCIO/LCIOConfig.cmake" ]]
+if [[ ! -e "LCIO_LIB/LCIOConfig.cmake" ]]
 then
 	curl -OL https://github.com/iLCSoft/LCIO/archive/v${LCIOVER}.tar.gz
 	tar xzf v${LCIOVER}.tar.gz
-	mv LCIO-${LCIOVER} LCIO
+	mv LCIO-${LCIOVER} LCIO_LIB
 fi
-cd LCIO
+cd LCIO_LIB
 mkdir build
 cd build
 cmake ..

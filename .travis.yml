@@ -27,7 +27,7 @@ install:
 script:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
-  - export LCIO=${HOME}/LCIO
+  - export LCIO=${HOME}/LCIO_LIB
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
   - julia -e 'Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap")'

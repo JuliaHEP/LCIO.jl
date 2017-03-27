@@ -14,8 +14,8 @@ lciowrap_builddir = joinpath(BinDeps.depsdir(liblciowrap),"builds","lciowrap")
 lciowrap_srcdir = joinpath(BinDeps.depsdir(liblciowrap), "src", "lciowrap")
 # use a generic, unversioned dir name to simplify installation and keep travis installation
 # reasonably symmetric with this version
-lcio_libdir = haskey(ENV, "LCIO") ? ENV["LCIO"] : joinpath(lciowrap_builddir, "LCIO", "lib")
-lcio_srcdir = haskey(ENV, "LCIO") ? ENV["LCIO"] : joinpath(lciowrap_builddir, "LCIO")
+lcio_libdir = haskey(ENV, "LCIO") ? ENV["LCIO"] : joinpath(lciowrap_builddir, "LCIO_LIB", "lib")
+lcio_srcdir = haskey(ENV, "LCIO") ? ENV["LCIO"] : joinpath(lciowrap_builddir, "LCIO_LIB")
 lib_prefix = @static is_windows() ? "" : "lib"
 lib_suffix = @static is_windows() ? "dll" : (@static is_apple() ? "dylib" : "so")
 lcio_library = joinpath(lcio_libdir, "$(lib_prefix)lcio.$(lib_suffix)")
