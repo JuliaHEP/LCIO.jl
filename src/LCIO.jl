@@ -17,11 +17,6 @@ include(depsfile)
 
 wrap_module(_l_lciowrap)
 
-# function __init__()
-#     atexit() do
-#     end
-# end
-
 immutable CalHit
 	x::Cfloat
 	y::Cfloat
