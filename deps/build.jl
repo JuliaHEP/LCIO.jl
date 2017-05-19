@@ -9,7 +9,7 @@ cxx_wrap_dir = Pkg.dir("CxxWrap","deps","usr","lib","cmake")
 
 liblciowrap = library_dependency("liblciowrap")
 prefix=joinpath(BinDeps.depsdir(liblciowrap),"usr")
-lcioversion = "02-07-04"
+lcioversion = "02-08"
 # if the LCIO environment has been sourced, use it. Otherwise, download from svn
 lciowrap_srcdir = joinpath(BinDeps.depsdir(liblciowrap), "src", "lciowrap")
 lciowrap_builddir = joinpath(BinDeps.depsdir(liblciowrap),"builds","lciowrap")
