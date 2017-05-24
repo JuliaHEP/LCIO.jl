@@ -69,7 +69,6 @@ struct CastOperator
     }
 };
 
-
 namespace jlcxx
 {
     template<> struct SuperType<IMPL::LCEventImpl> { typedef EVENT::LCEvent type; };
@@ -103,6 +102,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
     lciowrap.method("at", [](const vector<short>* vec, size_t i) {
         return vec->at(i);
     });
+
     lciowrap.add_type<EVENT::LCParameters>("LCParameters")
         .method("getIntVal", &EVENT::LCParameters::getIntVal)
         .method("getFloatVal", &EVENT::LCParameters::getFloatVal)
@@ -340,7 +340,4 @@ JULIA_CPP_MODULE_BEGIN(registry)
         typedef typename decltype(wrapped)::type LCType;
         wrapped.method("cast", &LCType::cast);
     });
-
-
-
 JULIA_CPP_MODULE_END
