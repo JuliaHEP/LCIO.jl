@@ -1,24 +1,26 @@
 project(lciowrapper)
 
 cmake_minimum_required(VERSION 2.8.12)
-
 set(CMAKE_MACOSX_RPATH 0)
-
 list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
 add_definitions(-DJULIA_ENABLE_THREADING)
-
-find_package(CxxWrap REQUIRED)
 
 set(LCIO_DIR "${LCIO_INSTALLDIR}")
 find_package(LCIO REQUIRED)
 
-# this helps Libdl.dlopen find the right paths
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CxxWrap_DIR}/../;${LCIO_LIBRARY_DIRS}")
+set(JLCxx_DIR ${JLCXX_DIR}/share/cmake/JlCxx)
+find_package(JLCxx REQUIRED )
 
+# this helps Libdl.dlopen find the right paths
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JLCXX_DIR}/lib;${LCIO_LIBRARY_DIRS}")
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${JLCXX_DIR}/include)
 include_directories(${LCIO_INCLUDE_DIRS})
+include_directories(${JULIA_INCLUDE_DIR})
 
 add_library(lciowrap SHARED lciowrap.cc )
-target_link_libraries(lciowrap CxxWrap::cxx_wrap ${LCIO_LCIO_LIBRARY} ${LCIO_SIO_LIBRARY})
+target_link_libraries(lciowrap ${LCIO_LCIO_LIBRARY} ${LCIO_SIO_LIBRARY} JlCxx::jlcxx)
 
 install(TARGETS
   lciowrap

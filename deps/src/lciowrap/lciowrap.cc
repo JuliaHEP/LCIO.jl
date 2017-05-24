@@ -1,8 +1,8 @@
-#include <cxx_wrap.hpp>
 #include <string>
 #include <vector>
 #include <iostream>
 
+#include "jlcxx/jlcxx.hpp"
 #include "EVENT/Cluster.h"
 #include "EVENT/LCCollection.h"
 #include "EVENT/LCEvent.h"
@@ -20,21 +20,20 @@
 #include "EVENT/TrackerRawData.h"
 #include "EVENT/TrackerHit.h"
 #include "EVENT/Vertex.h"
-#include "IMPL/LCRunHeaderImpl.h"
+#include "IMPL/LCCollectionVec.h"
 #include "IMPL/LCEventImpl.h"
 #include "IMPL/MCParticleImpl.h"
+#include "IMPL/LCRunHeaderImpl.h"
 #include "IO/LCReader.h"
 #include "IO/LCWriter.h"
 #include "IOIMPL/LCFactory.h"
 #include "UTIL/BitField64.h"
 #include "UTIL/CellIDDecoder.h"
 #include "UTIL/LCRelationNavigator.h"
-
-#include <IMPL/LCCollectionVec.h>
-#include <UTIL/LCStdHepRdr.h>
+#include "UTIL/LCStdHepRdr.h"
 
 using namespace std;
-using namespace cxx_wrap;
+using namespace jlcxx;
 
 // This is just a simple wrapper class around the lccollection pointer
 // This will be constructed together with the type, which can be inferred from
@@ -46,17 +45,16 @@ struct TypedCollection
     TypedCollection(EVENT::LCCollection* collection) {
         m_coll = collection;
     }
-    TypedCollection(IMPL::LCCollectionVec* collection) {
-        m_coll = collection;
-    }
+    // TypedCollection(IMPL::LCCollectionVec* collection) {
+    //     m_coll = collection;
+    // }
     inline T* getElementAt(size_t i) {
         return static_cast<T*>(m_coll->getElementAt(i));
     }
     inline size_t getNumberOfElements() {
         return m_coll->getNumberOfElements();
     }
-    inline EVENT::LCCollection*
-    coll() {
+    inline EVENT::LCCollection* coll() {
         return m_coll;
     }
 };
@@ -72,7 +70,7 @@ struct CastOperator
 };
 
 
-namespace cxx_wrap
+namespace jlcxx
 {
     template<> struct SuperType<IMPL::LCEventImpl> { typedef EVENT::LCEvent type; };
     template<> struct SuperType<IMPL::LCCollectionVec> { typedef EVENT::LCCollection type; };
@@ -82,7 +80,7 @@ namespace cxx_wrap
 
 
 JULIA_CPP_MODULE_BEGIN(registry)
-    cxx_wrap::Module& lciowrap = registry.create_module("LCIO");
+    jlcxx::Module& lciowrap = registry.create_module("LCIO");
 
     lciowrap.add_type<EVENT::LCObject>("LCObject");
     lciowrap.add_type<vector<string>>("StringVec")
@@ -134,7 +132,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getTypeName", &EVENT::LCCollection::getTypeName)
         .method("getParameters", &EVENT::LCCollection::getParameters);
 
-    lciowrap.add_type<IMPL::LCCollectionVec>("LCCollectionVec", cxx_wrap::julia_type<EVENT::LCCollection>())
+    lciowrap.add_type<IMPL::LCCollectionVec>("LCCollectionVec", jlcxx::julia_type<EVENT::LCCollection>())
         .constructor<const string&>()
         .method("setTransient", &IMPL::LCCollectionVec::setTransient);
 
@@ -144,7 +142,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getDescription", &EVENT::LCRunHeader::getDescription)
         .method("getParameters", &EVENT::LCRunHeader::getParameters);
 
-    lciowrap.add_type<IMPL::LCRunHeaderImpl>("LCRunHeaderImpl", cxx_wrap::julia_type<EVENT::LCRunHeader>())
+    lciowrap.add_type<IMPL::LCRunHeaderImpl>("LCRunHeaderImpl", jlcxx::julia_type<EVENT::LCRunHeader>())
         .method("setRunNumber", &IMPL::LCRunHeaderImpl::setRunNumber)
         .method("setDetectorName", &IMPL::LCRunHeaderImpl::setDetectorName)
         .method("setDescription", &IMPL::LCRunHeaderImpl::setDescription)
@@ -219,7 +217,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getParameters", &EVENT::LCEvent::getParameters)
         .method("getWeight", &EVENT::LCEvent::getWeight);
 
-    lciowrap.add_type<IMPL::LCEventImpl>("LCEventImpl", cxx_wrap::julia_type<EVENT::LCEvent>())
+    lciowrap.add_type<IMPL::LCEventImpl>("LCEventImpl", jlcxx::julia_type<EVENT::LCEvent>())
         .method("setEventNumber", &IMPL::LCEventImpl::setEventNumber);
     lciowrap.method("addCollection", [](IMPL::LCEventImpl* event, IMPL::LCCollectionVec* col, const std::string& name) {
         event->addCollection(col, name);
@@ -285,7 +283,7 @@ JULIA_CPP_MODULE_BEGIN(registry)
         {
         typedef typename decltype(wrapped)::type WrappedColl;
         wrapped.template constructor<EVENT::LCCollection*>();
-        wrapped.template constructor<IMPL::LCCollectionVec*>();
+        // wrapped.template constructor<IMPL::LCCollectionVec*>();
         wrapped.method("getElementAt", &WrappedColl::getElementAt);
         wrapped.method("getNumberOfElements", &WrappedColl::getNumberOfElements);
         wrapped.method("coll", &WrappedColl::coll);
