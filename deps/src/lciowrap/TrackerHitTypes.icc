@@ -5,9 +5,12 @@ lciowrap.add_type<EVENT::SimTrackerHit>("SimTrackerHit")
     .method("getCellID1", &EVENT::SimTrackerHit::getCellID1)
     .method("getdEdx", &EVENT::SimTrackerHit::getdEdx)
     .method("getEDep", &EVENT::SimTrackerHit::getEDep)
-    .method("getTime", &EVENT::SimTrackerHit::getTime)
     .method("getMCParticle", &EVENT::SimTrackerHit::getMCParticle)
-    .method("getPathLength", &EVENT::SimTrackerHit::getPathLength);
+    .method("getPathLength", &EVENT::SimTrackerHit::getPathLength)
+    .method("getQuality", &EVENT::SimTrackerHit::getQuality)
+    .method("getTime", &EVENT::SimTrackerHit::getTime)
+    .method("isOverlay", &EVENT::SimTrackerHit::isOverlay)
+    .method("isProducedBySecondary", &EVENT::SimTrackerHit::isProducedBySecondary);
 // returns a bool to indicate whether this was a nullptr
 lciowrap.method("getPosition3", [](const EVENT::SimTrackerHit* hit, ArrayRef<double> x)->bool {
     const double* p = hit->getPosition();

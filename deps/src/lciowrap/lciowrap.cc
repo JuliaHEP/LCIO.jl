@@ -31,6 +31,7 @@
 #include "UTIL/CellIDDecoder.h"
 #include "UTIL/LCRelationNavigator.h"
 #include "UTIL/LCStdHepRdr.h"
+#include "UTIL/LCTrackerConf.h"
 
 using namespace std;
 using namespace jlcxx;

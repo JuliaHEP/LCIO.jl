@@ -60,3 +60,4 @@ lciowrap.method("getTracks", [](const Track* t)->const TrackVec& {
 lciowrap.method("getTrackStates", [](const Track* t)->const TrackStateVec& {
     return t->getTrackStates();
 });
+lciowrap.add_type<UTIL::LCTrackerCellID>("LCTrackerCellID");
