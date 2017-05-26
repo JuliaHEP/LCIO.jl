@@ -5,11 +5,11 @@ libdir_opt = ""
 
 @BinDeps.setup
 
-cxx_wrap_dir = Pkg.dir("CxxWrap","deps","usr","lib","cmake")
+jlcxx_dir = Pkg.dir("CxxWrap","deps","usr","share","cmake","JlCxx")
 
 liblciowrap = library_dependency("liblciowrap")
 prefix=joinpath(BinDeps.depsdir(liblciowrap),"usr")
-lcioversion = "02-07-04"
+lcioversion = "02-08"
 # if the LCIO environment has been sourced, use it. Otherwise, download from svn
 lciowrap_srcdir = joinpath(BinDeps.depsdir(liblciowrap), "src", "lciowrap")
 lciowrap_builddir = joinpath(BinDeps.depsdir(liblciowrap),"builds","lciowrap")
@@ -43,7 +43,7 @@ provides(BuildProcess,
     @build_steps begin
       ChangeDirectory(lciowrap_builddir)
       FileRule(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix"), @build_steps begin
-      	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DLIBDIR_SUFFIX="$libdir_opt" -DLCIO_INSTALLDIR="$lcio_srcdir" $lciowrap_srcdir`
+      	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DJlCxx_DIR="$jlcxx_dir" -DLIBDIR_SUFFIX="$libdir_opt" -DLCIO_INSTALLDIR="$lcio_srcdir"  $lciowrap_srcdir`
         `make`
         `make install`
       end)
