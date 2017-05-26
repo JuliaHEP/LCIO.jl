@@ -1,5 +1,5 @@
 #!/bin/sh
-LCIOVER=""
+LCIOVER="SOMETHING_WENT_WRONG"
 if [[ $# -ge 1 ]]
 then
 	LCIOVER=${1}

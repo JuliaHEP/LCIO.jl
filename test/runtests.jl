@@ -20,6 +20,7 @@ LCIO.iterate("test.slcio") do event
         end
     end
 end
+println("First iteration successful")
 
 # test that everything is closed and opened properly
 LCIO.open("test.slcio") do reader
@@ -44,6 +45,7 @@ for event in reader
 end
 @test iEvent == length(reader)
 end
+println("Second iteration successful")
 
 # test the stdhep reader
 LCIO.openStdhep("test.stdhep") do reader
@@ -58,11 +60,12 @@ LCIO.openStdhep("test.stdhep") do reader
     end
     @test iEvent == length(reader)
 end
+println("Stdhep iteration successful")
 
 # test creating a new file and writing out a particle
 wrt = LCIO.createLCWriter()
 
-LCIO.open(wrt, "writeTest.slcio", 0)
+LCIO.open(wrt, "writeTest.slcio", LCIO.WRITE_NEW)
 run = LCIO.LCRunHeaderImpl()
 LCIO.setRunNumber(run, 0)
 LCIO.setValue(LCIO.parameters(run),"Purpose","runTest")
@@ -74,11 +77,11 @@ pdg = -13
 charge = +1.f0
 mass =  0.105658f0
 theta = 85./180.f0 * pi
-for i in 1:10
-    col = LCIO.LCCollectionVec(LCIO.MCPARTICLE)
+for i in 1:1
     evt = LCIO.LCEventImpl()
+    col = LCIO.LCCollectionVec(LCIO.MCPARTICLE)
+    LCIO.setTransient(col, false)
     LCIO.setEventNumber(evt, i)
-    LCIO.addCollection(evt, col, "genParticles")
     phi = rand() * 2pi
     energy = sqrt(mass^2 + p^2)
     px = p * cos(phi) * sin(theta)
@@ -93,6 +96,8 @@ for i in 1:10
     LCIO.setMomentum(mcp, momentum)
     LCIO.setCharge(mcp, charge)
     LCIO.addElement(col, mcp)
+    LCIO.addCollection(evt, col, "genParticles")
     LCIO.writeEvent(wrt, evt)
 end
 LCIO.close(wrt)
+println("WriteEvent successful")

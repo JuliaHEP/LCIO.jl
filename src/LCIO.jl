@@ -17,11 +17,6 @@ include(depsfile)
 
 wrap_module(_l_lciowrap)
 
-# function __init__()
-#     atexit() do
-#     end
-# end
-
 immutable CalHit
 	x::Cfloat
 	y::Cfloat
@@ -30,9 +25,11 @@ immutable CalHit
 end
 
 const MCPARTICLE = "MCParticle"
+const WRITE_NEW = 0
+const WRITE_APPEND = 1
 
 # iteration over std vectors
-typealias StdVecs Union{ClusterVec, CalorimeterHitVec, TrackVec, StringVec, MCParticleVec}
+const StdVecs = Union{ClusterVec, CalorimeterHitVec, TrackVec, StringVec, MCParticleVec}
 
 # uses Julia counting, 1..n
 start(it::StdVecs) = convert(UInt64, 1)
@@ -201,7 +198,7 @@ end
 getP3(x) = getPosition(x)
 
 # converters to keep older code working
-typealias CalHits Union{SimCalorimeterHit, CalorimeterHit, RawCalorimeterHit}
+const CalHits = Union{SimCalorimeterHit, CalorimeterHit, RawCalorimeterHit}
 
 function CalHit(h::CalHits)
     p = getPosition(h)
