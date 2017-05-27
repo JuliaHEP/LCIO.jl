@@ -42,6 +42,7 @@ script:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
   - export LCIO=${HOME}/LCIO_LIB
+  - export PATH=/home/travis/julia/bin:${PATH}
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
   - julia -e 'Pkg.add("CxxWrap")'
