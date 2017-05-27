@@ -81,7 +81,6 @@ namespace jlcxx
 
 JULIA_CPP_MODULE_BEGIN(registry)
     jlcxx::Module& lciowrap = registry.create_module("LCIO");
-
     lciowrap.add_type<EVENT::LCObject>("LCObject");
     lciowrap.add_type<vector<string>>("StringVec")
         .method("size", &EVENT::StringVec::size);

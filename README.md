@@ -10,12 +10,7 @@ Prerequisites
 -------------
  - The julia programming language: http://julialang.org/
  - A compiler that accepts the --std=c++-14 flag. Set the CXX and CC environment variables if this is different from your default compiler.
- - An existing LCIO installation will be used if the environment variable "LCIO" is set. 
-```
-cd /path/to/lcio
-source setup.sh
-```
-Otherwise, LCIO will be built from source.
+LCIO will be built from source to reduce problems with version incompatibilities.
 
 
 Installation Instructions

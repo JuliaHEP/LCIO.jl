@@ -1,55 +1,66 @@
 using Compat
 using BinDeps
 
-libdir_opt = ""
+lcioversion = "02-08"
 
 @BinDeps.setup
 
 jlcxx_dir = Pkg.dir("CxxWrap","deps","usr","share","cmake","JlCxx")
 
 liblciowrap = library_dependency("liblciowrap")
-prefix=joinpath(BinDeps.depsdir(liblciowrap),"usr")
-lcioversion = "02-08"
-# if the LCIO environment has been sourced, use it. Otherwise, download from svn
-lciowrap_srcdir = joinpath(BinDeps.depsdir(liblciowrap), "src", "lciowrap")
-lciowrap_builddir = joinpath(BinDeps.depsdir(liblciowrap),"builds","lciowrap")
-lcio_srcdir = haskey(ENV, "LCIO") ? ENV["LCIO"] : joinpath(lciowrap_builddir, "LCIO-$(lcioversion)")
+prefix = BinDeps.depsdir(liblciowrap)
+downloads = joinpath(prefix, "downloads")
+lciowrap_builddir = joinpath(prefix, "builds", "lciowrap")
+lciowrap_srcdir = joinpath(prefix, "src", "lciowrap")
+lciowrap_destdir = joinpath(prefix, "usr")
+lcio_srcdir = joinpath(prefix, "src", "LCIO-$(lcioversion)")
+# if the LCIO environment has been sourced, use it. Otherwise, download the source and build
+lcio_destdir = haskey(ENV, "LCIO") ? ENV["LCIO"] : joinpath(prefix, "usr")
+
+libdir_opt = ""
 lib_prefix = @static is_windows() ? "" : "lib"
 lib_suffix = @static is_windows() ? "dll" : (@static is_apple() ? "dylib" : "so")
 
+lcio_library = joinpath(lcio_destdir, "lib", "$(lib_prefix)lcio.$(lib_suffix)")
+lciowrap_library = joinpath(prefix, "usr", "lib$libdir_opt", "$(lib_prefix)lciowrap.$(lib_suffix)")
+
 genopt = "Unix Makefiles"
 
-# LCIOConfig.cmake needs to be available. If not there, check out the LCIO source
-# unfortunately, this only works on POSIX at the moment
 # remove the previous libraries -- always build at least the library
-isfile(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix")) && rm(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix"))
-isfile(joinpath(lciowrap_builddir, "$(lib_prefix)lciowrap.$lib_suffix")) && rm(joinpath(lciowrap_builddir, "$(lib_prefix)lciowrap.$lib_suffix"))
-rm(joinpath(lciowrap_builddir, "CMakeFiles"), force=true, recursive=true)
+isfile(lciowrap_library) && rm(lciowrap_library)
+isfile(joinpath(lciowrap_builddir, "lib$libdir_opt", "$(lib_prefix)lciowrap.$(lib_suffix)")) && rm(joinpath(lciowrap_builddir, "lib$(libdir_opt)", "$(lib_prefix)lciowrap.$(lib_suffix)"))
 
 provides(BuildProcess,
   (@build_steps begin
-    FileRule(joinpath(lcio_srcdir, "LCIOConfig.cmake"), @build_steps begin
-        FileDownloader("https://github.com/iLCSoft/LCIO/archive/v$(lcioversion).tar.gz", joinpath(lciowrap_builddir,"$(lcioversion).tar.gz"))
-        FileUnpacker(joinpath(lciowrap_builddir,"$(lcioversion).tar.gz"), lciowrap_builddir, lcio_srcdir)
-        CreateDirectory(joinpath(lcio_srcdir, "build"))
+		# we're looking for the cmake file, even though the dependencies are the libs
+    FileRule(lcio_library, @build_steps begin
+        CreateDirectory(lciowrap_builddir)
         @build_steps begin
-            ChangeDirectory(joinpath(lcio_srcdir, "build"))
-            `cmake ..`
-            `make`
-            `make install`
+            ChangeDirectory(lciowrap_builddir)
+            FileDownloader("https://github.com/iLCSoft/LCIO/archive/v$(lcioversion).tar.gz", joinpath(downloads, "v$(lcioversion).tar.gz"))
+						CreateDirectory(joinpath(prefix, "src"))
+            FileUnpacker(joinpath(downloads, "v$(lcioversion).tar.gz"), joinpath(prefix, "src"), "LCIO-$(lcioversion)")
+						# GetSources(liblcio)
+						CreateDirectory(joinpath(lcio_srcdir, "build"))
+						@build_steps begin
+							ChangeDirectory(joinpath(lcio_srcdir, "build"))
+							`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX=$(lcio_destdir) $(lcio_srcdir)`
+							`make`
+							`make install`
+						end
         end
     end)
     CreateDirectory(lciowrap_builddir)
     @build_steps begin
       ChangeDirectory(lciowrap_builddir)
-      FileRule(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)lciowrap.$lib_suffix"), @build_steps begin
-      	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DJlCxx_DIR="$jlcxx_dir" -DLIBDIR_SUFFIX="$libdir_opt" -DLCIO_INSTALLDIR="$lcio_srcdir"  $lciowrap_srcdir`
+      FileRule(lciowrap_library, @build_steps begin
+      	`cmake -G "$(genopt)" -DCMAKE_INSTALL_PREFIX="$(lciowrap_destdir)" -DCMAKE_BUILD_TYPE="Release" -DJlCxx_DIR="$(jlcxx_dir)" -DLCIO_DIR="$(lcio_destdir)"  $(lciowrap_srcdir)`
         `make`
         `make install`
       end)
     end
   end),liblciowrap)
 
-deps = [liblciowrap]
+# deps = [liblcio, liblciowrap]
 
 @BinDeps.install Dict([(:liblciowrap, :_l_lciowrap)])

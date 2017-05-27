@@ -38,15 +38,15 @@ notifications:
 install:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
-  - if [ ! -e ${HOME}/lcio_bindir/lcio/CMakeLists.txt ]; then ./deps/install_lcio.sh; fi
 script:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
-  - export LCIO=${HOME}/lcio_bindir/lcio
+  - export LCIO=${HOME}/LCIO_LIB
+  - export PATH=/home/travis/julia/bin:${PATH}
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
-  - julia -e 'Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap")'
+  - julia -e 'Pkg.add("CxxWrap")'
   - julia -e 'Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
 cache:
   directories:
-  - ${HOME}/lcio_bindir
+    - ${HOME}/LCIO_LIB
