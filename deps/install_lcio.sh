@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 LCIOVER="SOMETHING_WENT_WRONG"
 if [[ $# -ge 1 ]]
 then

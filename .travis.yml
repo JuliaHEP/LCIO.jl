@@ -44,8 +44,8 @@ script:
   - export LCIO=${HOME}/LCIO_LIB
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.update()'
-  - julia -e 'Pkg.add("CxxWrap"); Pkg.checkout("CxxWrap")'
+  - julia -e 'Pkg.add("CxxWrap")'
   - julia -e 'Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
 cache:
   directories:
-  - ${HOME}/lcio_bindir
+  - ${HOME}/LCIO_LIB

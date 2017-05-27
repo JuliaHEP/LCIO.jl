@@ -35,7 +35,7 @@ provides(BuildProcess,
         CreateDirectory(lciowrap_builddir)
         @build_steps begin
             ChangeDirectory(lciowrap_builddir)
-                `sh $(joinpath(BinDeps.depsdir(liblciowrap), "install_lcio.sh")) $(lcioversion)`
+                `$(joinpath(BinDeps.depsdir(liblciowrap), "install_lcio.sh")) $(lcioversion)`
         end
     end)
     CreateDirectory(lciowrap_builddir)
