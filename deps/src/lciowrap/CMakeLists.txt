@@ -9,7 +9,7 @@ add_definitions(-DJULIA_ENABLE_THREADING)
 
 find_package(LCIO REQUIRED)
 
-# JLCxx_DIR needs to be passed in with -D
+# JlCxx_DIR needs to be passed in with -D
 find_package(JlCxx REQUIRED )
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${LCIO_LIBRARY_DIRS};${Julia_LIBRARY_DIR}")
@@ -17,7 +17,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${LCIO_LIBRARY_DIRS};${Juli
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${INTERFACE_INCLUDE_DIRECTORIES})
 include_directories(${LCIO_INCLUDE_DIRS})
-include_directories(${Julia_INCLUDE_DIRS})
+# include_directories(${Julia_INCLUDE_DIRS})
 
 add_library(lciowrap SHARED lciowrap.cc )
 target_link_libraries(lciowrap ${LCIO_LCIO_LIBRARY} ${LCIO_SIO_LIBRARY} JlCxx::jlcxx)
