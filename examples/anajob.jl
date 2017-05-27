@@ -10,7 +10,7 @@ LCIO.iterate(ARGS[1]) do event
 	println()
 
 	println(repeat("-", 70))
-	@printf("%-30s%-30s%-10s\n", "Collection Name", "Element Type", "Elements")
+	@printf("%-30s%-30s%-10s\n", "Collection name", "Element type", "Elements")
 	println(repeat("=", 70))
 	for name in getCollectionNames(event)
 		c = getCollection(event, name)
