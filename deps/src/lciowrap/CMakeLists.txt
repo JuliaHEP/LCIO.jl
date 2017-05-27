@@ -7,7 +7,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
 add_definitions(-DJULIA_ENABLE_THREADING)
 
-set(LCIO_DIR "${LCIO_INSTALLDIR}")
 find_package(LCIO REQUIRED)
 
 # JLCxx_DIR needs to be passed in with -D
