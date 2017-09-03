@@ -15,7 +15,7 @@ if !isfile(depsfile)
 end
 include(depsfile)
 
-wrap_modules(_l_lciowrap)
+wrap_module(_l_lciowrap, LCIO)
 
 immutable CalHit
 	x::Cfloat
