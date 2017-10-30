@@ -56,3 +56,18 @@ LCIO.open("file.slcio") do reader
 end
 ```
 There are more examples in the `examples/` directory.
+
+Troubleshooting
+---------------
+There are currently a couple of hiccups in the dependencies. Work to simplify the installation process is on-going, but in the meantime:
+Ubuntu 17.10:
+ - Install zlib, cmake, g++-7 through the package manager
+ - Download Julia from the julialang.org homepage
+ - Set the PATH variable such that you find the julia executable
+ - start julia
+ ```Pkg.add("CxxWrap")
+ Pkg.checkout("CxxWrap")
+ Pkg.add("LCIO")
+ Pkg.test("LCIO")
+ ```
+If that doesn't work, please complain through the issues. I have not tested this on other systems recently.
