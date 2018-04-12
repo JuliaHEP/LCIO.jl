@@ -1,7 +1,7 @@
 using Compat
 using BinDeps
 
-lcioversion = "02-09"
+lcioversion = "02-12"
 
 @BinDeps.setup
 
