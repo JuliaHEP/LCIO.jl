@@ -5,7 +5,7 @@ lcioversion = "02-12"
 
 @BinDeps.setup
 
-jlcxx_dir = Pkg.dir("CxxWrap","deps","usr","share","cmake","JlCxx")
+jlcxx_dir = Pkg.dir("CxxWrap","deps","usr","lib","cmake","JlCxx")
 
 liblciowrap = library_dependency("liblciowrap")
 prefix = BinDeps.depsdir(liblciowrap)
