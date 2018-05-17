@@ -15,6 +15,7 @@ LCIO will be built from source to reduce problems with version incompatibilities
 
 Installation Instructions
 -------------------------
+Make sure that the `julia` executable is in your `$PATH` environment variable, or your `$JULIA_HOME` variable is set to the directory that contains the `julia` executable. 
 ```
 bash
 julia -e 'Pkg.add("LCIO")'
