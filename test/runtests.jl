@@ -18,6 +18,11 @@ LCIO.iterate("test.slcio") do event
         for parent in parentList
             @test getEnergy(parent) > 0
         end
+        #direct access
+        nParents = length(parentList)
+        for i = 1:nParents
+            @test getEnergy(parentList[i]) > 0
+        end
     end
 end
 println("First iteration successful")
