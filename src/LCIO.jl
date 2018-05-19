@@ -37,7 +37,8 @@ next(it::StdVecs, i) = (it[i], i+1)
 done(it::StdVecs, i) = i > length(it)
 length(it::StdVecs) = size(it)
 # 'at' uses C counting, 0..n-1
-getindex(it::StdVecs, i) = at(it, i-1)
+# FIXME is the cast necessary?
+getindex(it::StdVecs, i) = at(it, convert(UInt64, i-1))
 
 start(it::LCReader) = getNumberOfEvents(it)
 next(it::LCReader, state) = readNextEvent(it), state-1
