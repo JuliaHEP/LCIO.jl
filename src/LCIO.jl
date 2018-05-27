@@ -41,7 +41,14 @@ length(it::StdVecs) = size(it)
 getindex(it::StdVecs, i) = at(it, convert(UInt64, i-1))
 
 start(it::LCReader) = getNumberOfEvents(it)
-next(it::LCReader, state) = readNextEvent(it), state-1
+function next(it::LCReader, state)
+    event = readNextEvent(it)
+    if event.cpp_object == C_NULL
+        return event, 0 
+    end
+    event, state-1
+end
+
 done(it::LCReader, state) = state < 1
 length(it::LCReader) = getNumberOfEvents(it)
 
