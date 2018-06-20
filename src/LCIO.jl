@@ -17,7 +17,7 @@ include(depsfile)
 
 wrap_module(_l_lciowrap, LCIO)
 
-immutable CalHit
+struct CalHit
 	x::Cfloat
 	y::Cfloat
 	z::Cfloat
@@ -98,14 +98,14 @@ LCIOTypemap = Dict(
 # if this becomes a speed problem, the length could be memoized, or iteration order could be inverted
 start(it::TypedCollection) = convert(UInt64, 1)
 done(it::TypedCollection, i) = i > length(it)
-next{T}(it::TypedCollection{T}, i) = it[i], i+1
+next(it::TypedCollection{T}, i) where {T} = it[i], i+1
 length(it::TypedCollection) = getNumberOfElements(it)
 # getindex uses Julia counting, getElementAt uses C counting
 getindex(it::TypedCollection, i) = getElementAt(it, convert(UInt64, i-1))
 
-CellIDDecoder{T}(t::TypedCollection{T}) = CellIDDecoder{T}(coll(t))
+CellIDDecoder(t::TypedCollection{T}) where {T} = CellIDDecoder{T}(coll(t))
 
-getTypeName{T}(coll::TypedCollection{T}) = "$T"
+getTypeName(coll::TypedCollection{T}) where {T} = "$T"
 
 # to get the typed collection, one needs to read the typename
 # then we can return the right type from the LCIOTypemap
@@ -115,7 +115,7 @@ function getCollection(event, collectionName)
 	return TypedCollection{LCIOTypemap[collectionType]}(collection)
 end
 
-type LCStdHepRdr
+mutable struct LCStdHepRdr
     r::_LCStdHepRdrCpp
     e::LCEventImpl
 end
@@ -132,6 +132,7 @@ function openStdhep(f::Function, fn::AbstractString)
     reader = LCStdHepRdr(string(fn))
     try
 	f(reader)
+    catch
     end
 end
 
@@ -173,7 +174,7 @@ end
 
 # the navigator gets initialized with a collection
 # it defers the actual work to the C++ implementation
-immutable LCRelationNavigator
+struct LCRelationNavigator
     relnav
     fromType
     toType
