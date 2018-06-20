@@ -1,5 +1,5 @@
 using LCIO
-using Base.Test
+using Test
 
 # test iteration
 LCIO.iterate("test.slcio") do event
