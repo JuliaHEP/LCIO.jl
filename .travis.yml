@@ -4,31 +4,12 @@ matrix:
   include:
   - os: linux
     julia: 1.0.0
-    sudo: required
     dist: trusty
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-        packages:
-          - g++-6
-          - gcc-6
-    env: MYCXX=g++-6 MYCC=gcc-6
   - os: osx
-    osx_image: xcode8.2
     julia: 1.0.0
 
 notifications:
   email: false
-install:
-  - export CXX=${MYCXX}
-  - export CC=${MYCC}
 script:
-  - export CXX=${MYCXX}
-  - export CC=${MYCC}
-  - export LCIO=${HOME}/LCIO_LIB
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
-cache:
-  directories:
-    - ${HOME}/LCIO_LIB
+  - julia -e 'using Pkg; Pkg.add("Test"); Pkg.add("Libdl"); Pkg.develop(PackageSpec(url=pwd())); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
