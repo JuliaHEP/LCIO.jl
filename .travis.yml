@@ -12,4 +12,4 @@ notifications:
   email: false
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.add("Test"); Pkg.add("Libdl"); Pkg.develop(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
+  - julia -e 'using Pkg; Pkg.add("Test"); Pkg.add("Libdl"); Pkg.develop(PackageSpec(url=pwd())); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
