@@ -83,7 +83,7 @@ p = 5.0
 pdg = -13
 charge = +1.f0
 mass =  0.105658f0
-theta = 85./180.f0 * pi
+theta = 85. / 180.f0 * pi
 for i in 1:1
     evt = LCIO.LCEventImpl()
     col = LCIO.LCCollectionVec(LCIO.MCPARTICLE)

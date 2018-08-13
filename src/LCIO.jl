@@ -1,4 +1,5 @@
 module LCIO
+__precompile__(false)
 using CxxWrap
 import Base: getindex, length, convert, iterate
 export CalHit, getP4, getPosition, CellIDDecoder,
@@ -40,7 +41,7 @@ getindex(it::StdVecs, i) = at(it, convert(UInt64, i-1))
 
 function iterate(it::LCReader)
     event = readNextEvent(it)
-    if isNull(event)
+    if isnull(event)
         return nothing
     end
     nEvents = getNumberOfEvents(it)
@@ -51,7 +52,7 @@ function iterate(it::LCReader, state)
         return nothing
     end
     event = readNextEvent(it)
-    if isNull(event)
+    if isnull(event)
         return nothing 
     end
     return (event, state - 1)
@@ -60,7 +61,7 @@ length(it::LCReader) = getNumberOfEvents(it)
 
 function open(f::Function, fn::AbstractString)
     reader = createLCReader()
-    if isNull(reader)
+    if isnull(reader)
         return nothing
     end
     try
@@ -150,31 +151,31 @@ function readNextEvent(r::LCStdHepRdr)
 end
 
 function getPosition(hit)
-    p3 = Array{Float64,1}(3)
+    p3 = Array{Float64,1}(undef, 3)
     valid = getPosition3(hit, p3)
     return p3
 end
 
 function getMomentum(particle)
-    p3 = Array{Float64,1}(3)
+    p3 = Array{Float64,1}(undef, 3)
     valid = getMomentum3(particle, p3)
     return p3
 end
 
 function getVertex(particle)
-    p3 = Array{Float64,1}(3)
+    p3 = Array{Float64,1}(undef, 3)
     valid = getVertex3(particle, p3)
     return valid, p3
 end
 
 function getEndpoint(particle)
-    p3 = Array{Float64,1}(3)
+    p3 = Array{Float64,1}(undef, 3)
     valid = getEndpoint3(particle, p3)
     return valid, p3
 end
 
 function getMomentumAtEndpoint(particle)
-    p3 = Array{Float64,1}(3)
+    p3 = Array{Float64,1}(undef, 3)
     valid = getMomentumAtEndpoint3(particle, p3)
     return valid, p3
 end
