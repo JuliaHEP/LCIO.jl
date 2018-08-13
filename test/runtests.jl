@@ -2,7 +2,8 @@ using LCIO
 using Test
 
 # test iteration
-LCIO.iterate("test.slcio") do event
+LCIO.open("test.slcio") do reader
+for event in reader
     mcparts = getCollection(event, "MCParticle")
     for p in mcparts
         e = getEnergy(p)
@@ -24,6 +25,7 @@ LCIO.iterate("test.slcio") do event
             @test getEnergy(parentList[i]) > 0
         end
     end
+end
 end
 println("First iteration successful")
 

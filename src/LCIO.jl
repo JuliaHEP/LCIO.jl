@@ -1,7 +1,6 @@
-__precompile__(false)
 module LCIO
 using CxxWrap
-import Base: getindex, start, done, next, length, convert
+import Base: getindex, length, convert, iterate
 export CalHit, getP4, getPosition, CellIDDecoder,
     getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
     getTypeName, # LCCollection
@@ -15,7 +14,7 @@ if !isfile(depsfile)
 end
 include(depsfile)
 
-wrap_module(_l_lciowrap, LCIO)
+@wrapmodule(liblciowrap)
 
 struct CalHit
 	x::Cfloat
@@ -32,43 +31,40 @@ const WRITE_APPEND = 1
 const StdVecs = Union{ClusterVec, CalorimeterHitVec, TrackVec, StringVec, MCParticleVec}
 
 # uses Julia counting, 1..n
-start(it::StdVecs) = convert(UInt64, 1)
-next(it::StdVecs, i) = (it[i], i+1)
-done(it::StdVecs, i) = i > length(it)
+iterate(it::StdVecs) = length(it) > 0 ? (it[1], 2) : nothing
+iterate(it::StdVecs, i) = i <= length(it) ? (it[i], i+1) : nothing
 length(it::StdVecs) = size(it)
 # 'at' uses C counting, 0..n-1
 # FIXME is the cast necessary?
 getindex(it::StdVecs, i) = at(it, convert(UInt64, i-1))
 
-start(it::LCReader) = getNumberOfEvents(it)
-function next(it::LCReader, state)
+function iterate(it::LCReader)
     event = readNextEvent(it)
-    if event.cpp_object == C_NULL
-        return event, 0 
+    if isNull(event)
+        return nothing
     end
-    event, state-1
+    nEvents = getNumberOfEvents(it)
+    return (event, nEvents - 1)
 end
-
-done(it::LCReader, state) = state < 1
+function iterate(it::LCReader, state)
+    if state < 1
+        return nothing
+    end
+    event = readNextEvent(it)
+    if isNull(event)
+        return nothing 
+    end
+    return (event, state - 1)
+end
 length(it::LCReader) = getNumberOfEvents(it)
-
-function iterate(f::Function, fn::AbstractString)
-    reader = createLCReader()
-    openFile(reader, fn)
-    try
-        for event in reader
-            f(event)
-        end
-    finally
-        closeFile(reader)
-        deleteLCReader(reader)
-    end
-end
 
 function open(f::Function, fn::AbstractString)
     reader = createLCReader()
-    openFile(reader, fn)
+    if isNull(reader)
+        return nothing
+    end
     try
+        openFile(reader, fn)
         f(reader)
     finally
         closeFile(reader)
@@ -96,9 +92,8 @@ LCIOTypemap = Dict(
 
 # This version of the iteration runs length() multiple times during the iteration
 # if this becomes a speed problem, the length could be memoized, or iteration order could be inverted
-start(it::TypedCollection) = convert(UInt64, 1)
-done(it::TypedCollection, i) = i > length(it)
-next(it::TypedCollection{T}, i) where {T} = it[i], i+1
+iterate(it::TypedCollection) = length(it) > 0 ? (it[1], 2) : nothing 
+iterate(it::TypedCollection, i) = i <= length(it) ? (it[i], i+1) : nothing
 length(it::TypedCollection) = getNumberOfElements(it)
 # getindex uses Julia counting, getElementAt uses C counting
 getindex(it::TypedCollection, i) = getElementAt(it, convert(UInt64, i-1))
@@ -123,9 +118,21 @@ LCStdHepRdr(filename) = LCStdHepRdr(_LCStdHepRdrCpp(filename), LCEventImpl())
 
 # the LCStdHepRdr implementation in C++ is not consistent with the LCIO reader
 # this is me trying to make things a bit better
-start(it::LCStdHepRdr) = length(it.r)
-next(it::LCStdHepRdr, state) = readNextEvent(it.r), state-1
-done(it::LCStdHepRdr, state) = state < 1
+function iterate(it::LCStdHepRdr)
+    l = length(it.r)
+    if l == 0
+        return nothing
+    else
+        return readNextEvent(it.r), l - 1
+    end
+end 
+function iterate(it::LCStdHepRdr, state)
+    if state > 0
+        return readNextEvent(it.r), state-1
+    else
+        return nothing
+    end
+end
 length(it::LCStdHepRdr) = getNumberOfEvents(it.r)
 
 function openStdhep(f::Function, fn::AbstractString)
@@ -215,11 +222,11 @@ function CalHit(h::CalHits)
     return CalHit(p[1], p[2], p[3], E)
 end
 
-function convert(::Type(CalHit), h::CalHits)
-    p = getPosition(h)
-    E = getEnergy(h)
-    return CalHit(p[1], p[2], p[3], E)
-end
+# function convert(::Type(CalHit), h::CalHits)
+#     p = getPosition(h)
+#     E = getEnergy(h)
+#     return CalHit(p[1], p[2], p[3], E)
+# end
 
 function printParameters(p::LCParameters)
     println("strings:")
