@@ -3,7 +3,7 @@ language: julia
 matrix:
   include:
   - os: linux
-    julia: nightly
+    julia: 1.0.0
     sudo: required
     dist: trusty
     addons:
@@ -16,7 +16,7 @@ matrix:
     env: MYCXX=g++-6 MYCC=gcc-6
   - os: osx
     osx_image: xcode8.2
-    julia: nightly
+    julia: 1.0.0
 
 notifications:
   email: false
