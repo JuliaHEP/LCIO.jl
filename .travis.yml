@@ -15,7 +15,6 @@ matrix:
           - gcc-6
     env: MYCXX=g++-6 MYCC=gcc-6
   - os: osx
-    osx_image: xcode8.2
     julia: 1.0.0
 
 notifications:
@@ -28,7 +27,7 @@ script:
   - export CC=${MYCC}
   - export LCIO=${HOME}/LCIO_LIB
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.clone(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
+  - julia -e 'using Pkg; Pkg.add("Test"); Pkg.add("Libdl"); Pkg.add(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
 cache:
   directories:
     - ${HOME}/LCIO_LIB
