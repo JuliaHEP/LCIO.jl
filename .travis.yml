@@ -25,9 +25,5 @@ install:
 script:
   - export CXX=${MYCXX}
   - export CC=${MYCC}
-  - export LCIO=${HOME}/LCIO_LIB
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.add("Test"); Pkg.add("Libdl"); Pkg.add(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
-cache:
-  directories:
-    - ${HOME}/LCIO_LIB
+  - julia -e 'using Pkg; Pkg.add("Test"); Pkg.add("Libdl"); Pkg.dev(pwd()); Pkg.build("LCIO"); Pkg.test("LCIO"; coverage=true)'
