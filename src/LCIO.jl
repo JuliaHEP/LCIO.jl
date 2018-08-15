@@ -38,6 +38,11 @@ length(it::StdVecs) = size(it)
 # 'at' uses C counting, 0..n-1
 # FIXME is the cast necessary?
 getindex(it::StdVecs, i) = at(it, convert(UInt64, i-1))
+eltype(::Type{ClusterVec}) = Cluster
+eltype(::Type{CalorimeterHitVec}) = CalorimeterHit
+eltype(::Type{TrackVec}) = Track
+eltype(::Type{StringVec}) = String
+eltype(::Type{MCParticleVec}) = MCParticle
 
 function iterate(it::LCReader)
     event = readNextEvent(it)
@@ -58,6 +63,7 @@ function iterate(it::LCReader, state)
     return (event, state - 1)
 end
 length(it::LCReader) = getNumberOfEvents(it)
+eltype(::Type{LCReader}) = LCEvent
 
 function open(f::Function, fn::AbstractString)
     reader = createLCReader()
@@ -98,10 +104,9 @@ iterate(it::TypedCollection, i) = i <= length(it) ? (it[i], i+1) : nothing
 length(it::TypedCollection) = getNumberOfElements(it)
 # getindex uses Julia counting, getElementAt uses C counting
 getindex(it::TypedCollection, i) = getElementAt(it, convert(UInt64, i-1))
-
 CellIDDecoder(t::TypedCollection{T}) where {T} = CellIDDecoder{T}(coll(t))
-
 getTypeName(coll::TypedCollection{T}) where {T} = "$T"
+eltype(::Type{TypedCollection{T}}) where {T} = T
 
 # to get the typed collection, one needs to read the typename
 # then we can return the right type from the LCIOTypemap
@@ -135,6 +140,8 @@ function iterate(it::LCStdHepRdr, state)
     end
 end
 length(it::LCStdHepRdr) = getNumberOfEvents(it.r)
+eltype(::Type{LCStdHepRdr}) = TypedCollection{MCParticle}
+
 
 function openStdhep(f::Function, fn::AbstractString)
     reader = LCStdHepRdr(string(fn))
