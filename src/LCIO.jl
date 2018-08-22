@@ -1,6 +1,16 @@
 module LCIO
-__precompile__(false)
 using CxxWrap
+const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
+if !isfile(depsfile)
+  error("$depsfile not found, CxxWrap did not build properly")
+end
+include(depsfile)
+@wrapmodule(liblciowrap)
+
+function __init__()
+  @initcxx
+end
+
 import Base: getindex, length, convert, iterate
 export CalHit, getP4, getPosition, CellIDDecoder,
     getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
@@ -9,13 +19,7 @@ export CalHit, getP4, getPosition, CellIDDecoder,
     getCalorimeterHits, # Cluster
     getClusters, getType, isCompound, getMass, getCharge, getReferencePoint, getParticleIDs, getParticleIDUsed, getGoodnessOfPID, getParticles, getClusters, getTracks, getStartVertex, getEndVertex # ReconstructedParticle
 
-const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
-if !isfile(depsfile)
-  error("$depsfile not found, CxxWrap did not build properly")
-end
-include(depsfile)
 
-@wrapmodule(liblciowrap)
 
 struct CalHit
 	x::Cfloat

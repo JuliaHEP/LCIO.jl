@@ -41,9 +41,9 @@ end
 const wrapprefix = Prefix(joinpath(@__DIR__, "usr"))
 
 # Download binaries from hosted location
-const wrap_bin_prefix = "https://github.com/jstrube/LCIOWrapBuilder/releases/download/untagged-6febbc8733a82f21b23c/"
+const wrap_bin_prefix = "https://github.com/jstrube/LCIOWrapBuilder/releases/download/v0.4.1"
 download_info = Dict(
-        Linux(:x86_64, :glibc) => ("$wrap_bin_prefix/LCIOWrapBuilder.v0.99.0.x86_64-linux-gnu.tar.gz",     "7c04ebf034323b197233f6792546b114880726f40a904c11cc683c85e24458bc"),
+        Linux(:x86_64, :glibc) => ("$wrap_bin_prefix/LCIOWrapBuilder.v0.99.0.x86_64-linux-gnu.tar.gz",     "ef3dc6ebf197aabcc7f0680ae8aa162d58872e371e20d3ca85bfa00abc5be4b0"),
     )
 
 # The products that we will ensure are always built
