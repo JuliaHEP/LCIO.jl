@@ -1,6 +1,6 @@
 LCIO bindings for Julia
 =======================
-Build Status: [![Build Status](https://travis-ci.org/jstrube/LCIO.jl.svg?branch=master)](https://travis-ci.org/jstrube/LCIO.jl)
+Build Status:[![Build Status](https://travis-ci.com/jstrube/LCIO.jl.svg?branch=master)](https://travis-ci.com/jstrube/LCIO.jl)
 
 Introduction
 ------------
