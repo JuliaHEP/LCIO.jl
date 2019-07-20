@@ -1,5 +1,7 @@
 name = "LCIO"
 uuid = "94167541-0a4e-5fbf-aeea-474b87c587e3"
+version = "1.2.0"
+author = ["Jan Strube <jan.strube@gmail.com>"]
 
 [deps]
 BinaryProvider = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
