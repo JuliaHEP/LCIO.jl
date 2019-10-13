@@ -31,11 +31,13 @@ const WRITE_NEW = 0
 const WRITE_APPEND = 1
 
 function iterate(it::CxxPtr{LCReader})
+    # get the length first. Inverting the order of these two calls
+    # results in the first event being read twice.
+    nEvents = length(it)
     event = readNextEvent(it)
     if isnull(event)
         return nothing
     end
-    nEvents = length(it)
     return (event, nEvents - 1)
 end
 
@@ -50,6 +52,8 @@ function iterate(it::CxxPtr{LCReader}, state)
     return (event, state - 1)
 end
 
+# FIXME: Upstream bug: getNumberOfEvents resets the state of the reader
+# to one before this event, so that events can be read twice
 length(it::LCReader) = getNumberOfEvents(it)
 eltype(::Type{CxxPtr{LCReader}}) = LCEvent
 
