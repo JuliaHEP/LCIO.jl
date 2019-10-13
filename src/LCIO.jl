@@ -19,8 +19,6 @@ export CalHit, getP4, getPosition, CellIDDecoder,
     getCalorimeterHits, # Cluster
     getClusters, getType, isCompound, getMass, getCharge, getReferencePoint, getParticleIDs, getParticleIDUsed, getGoodnessOfPID, getParticles, getClusters, getTracks, getStartVertex, getEndVertex # ReconstructedParticle
 
-
-
 struct CalHit
 	x::Cfloat
 	y::Cfloat
@@ -32,31 +30,16 @@ const MCPARTICLE = "MCParticle"
 const WRITE_NEW = 0
 const WRITE_APPEND = 1
 
-# iteration over std vectors
-const StdVecs = Union{ClusterVec, CalorimeterHitVec, TrackVec, StringVec, MCParticleVec}
-
-# uses Julia counting, 1..n
-iterate(it::StdVecs) = length(it) > 0 ? (it[1], 2) : nothing
-iterate(it::StdVecs, i) = i <= length(it) ? (it[i], i+1) : nothing
-length(it::StdVecs) = size(it)
-# 'at' uses C counting, 0..n-1
-# FIXME is the cast necessary?
-getindex(it::StdVecs, i) = at(it, convert(UInt64, i-1))
-eltype(::Type{ClusterVec}) = Cluster
-eltype(::Type{CalorimeterHitVec}) = CalorimeterHit
-eltype(::Type{TrackVec}) = Track
-eltype(::Type{StringVec}) = String
-eltype(::Type{MCParticleVec}) = MCParticle
-
-function iterate(it::LCReader)
+function iterate(it::CxxPtr{LCReader})
     event = readNextEvent(it)
     if isnull(event)
         return nothing
     end
-    nEvents = getNumberOfEvents(it)
+    nEvents = length(it)
     return (event, nEvents - 1)
 end
-function iterate(it::LCReader, state)
+
+function iterate(it::CxxPtr{LCReader}, state)
     if state < 1
         return nothing
     end
@@ -66,8 +49,9 @@ function iterate(it::LCReader, state)
     end
     return (event, state - 1)
 end
+
 length(it::LCReader) = getNumberOfEvents(it)
-eltype(::Type{LCReader}) = LCEvent
+eltype(::Type{CxxPtr{LCReader}}) = LCEvent
 
 function open(f::Function, fn::AbstractString)
     reader = createLCReader()
@@ -114,9 +98,9 @@ eltype(::Type{TypedCollection{T}}) where {T} = T
 
 # to get the typed collection, one needs to read the typename
 # then we can return the right type from the LCIOTypemap
-function getCollection(event, collectionName)
-	collection = getEventCollection(event, collectionName)
-	collectionType = getTypeName(collection)
+function getCollection(event::CxxPtr{LCEvent}, collectionName)
+	collection = getEventCollection(event, StdString(collectionName))
+	collectionType = getTypeName(collection)[]
 	return TypedCollection{LCIOTypemap[collectionType]}(collection)
 end
 
@@ -197,10 +181,10 @@ struct LCRelationNavigator
     relnav
     fromType
     toType
-    LCRelationNavigator(coll::TypedCollection) = _completNavigator(new(LCRelNav(coll.coll)))
+    LCRelationNavigator(coll::TypedCollection) = _completeNavigator(new(LCRelNav(coll.coll)))
 end
 
-function _completNavigator(nav)
+function _completeNavigator(nav)
     nav.fromType = LCIOTypemap[nav.relnav.getFromType()]
     nav.toType = LCIOTypemap[nav.relnav.getToType()]
     nav
@@ -223,6 +207,8 @@ function getP4(x)
     return (E, p3)
 end
 
+Base.:(==)(x::CxxWrap.ConstCxxRef{CxxWrap.StdLib.StdString}, y) = x[] == y
+
 getP3(x) = getPosition(x)
 
 # converters to keep older code working
@@ -242,15 +228,15 @@ end
 
 function printParameters(p::LCParameters)
     println("strings:")
-    for k in getStringKeys(p, StringVec())
+    for k in getStringKeys(p, StdVector{StdString}())
         println(k, "\t", getStringVal(p, k))
     end
     println("floats:")
-    for k in getFloatKeys(p, StringVec())
+    for k in getFloatKeys(p, StdVector{StdString}())
         println(k, "\t", getFloatVal(p, k))
     end
     println("ints:")
-    for k in getIntKeys(p, StringVec())
+    for k in getIntKeys(p, StdVector{StdString}())
         println(k, "\t", getIntVal(p, k))
     end
 end
