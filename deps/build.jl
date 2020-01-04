@@ -46,7 +46,8 @@ end
 ######################################################
 
 ################### LCIO Wrapper #####################
-const wrapprefix = Prefix(joinpath(@__DIR__, "usr"))
+const LCIOJL_DIR = get(ENV, "LCIOJL_DIR", "")
+const wrapprefix = Prefix(LCIOJL_DIR == "" ? get([a for a in ARGS if a != "--verbose"], 1, joinpath(@__DIR__, "usr")) : LCIOJL_DIR)
 
 # Download binaries from hosted location
 bin_prefix = "https://github.com/jstrube/LCIOWrapBuilder/releases/download/v0.6.2"
@@ -66,19 +67,30 @@ wrapproducts = [
 
 # Install unsatisfied or updated dependencies:
 unsatisfied = any(!satisfied(p; verbose=verbose) for p in wrapproducts)
-dl_info = choose_download(download_info, platform_key_abi())
-if dl_info === nothing && unsatisfied
-    # If we don't have a compatible .tar.gz to download, complain.
-    # Alternatively, you could attempt to install from a separate provider,
-    # build from source or something even more ambitious here.
-    error("Your platform (\"$(Sys.MACHINE)\", parsed as \"$(triplet(platform_key_abi()))\") is not supported by this package!")
+transform_platform(platform) = typeof(platform)(platform.arch;libc=platform.libc,call_abi=platform.call_abi,compiler_abi=CompilerABI(max(platform.compiler_abi.gcc_version,:gcc7),:cxx11))
+transform_platform(platform::MacOS) = MacOS(:x86_64)
+if LCIOJL_DIR == ""
+    platform = transform_platform(platform_key_abi())
+    if haskey(download_info, platform)
+        if !supported
+            error("Julia version $VERSION is not supported for binary download. Please build libcxxwrap-julia from source and set the JLCXX_DIR environment variable to the build dir or installation prefix.")
+        end
+        url, tarball_hash = download_info[platform]
+        if unsatisfied || !isinstalled(url, tarball_hash; prefix=prefix)
+            # Download and install binaries
+            install(url, tarball_hash; prefix=prefix, force=true, verbose=verbose,ignore_platform=true)
+        end
+    elseif unsatisfied
+        # If we don't have a BinaryProvider-compatible .tar.gz to download, complain.
+        # Alternatively, you could attempt to install from a separate provider,
+        # build from source or something even more ambitious here.
+        error("Your platform $(triplet(platform)) is not supported by this package!")
+    end
+else
+    if unsatisfied
+        error("The required libraries were not found in the provided LCIOJL_DIR directory $LCIOJL_DIR")
+    end
 end
 
-# If we have a download, and we are unsatisfied (or the version we're
-# trying to install is not itself installed) then load it up!
-if unsatisfied || !isinstalled(dl_info...; prefix=wrapprefix)
-    # Download and install binaries
-    install(dl_info...; prefix=wrapprefix, force=true, verbose=verbose) 
-end
 
 write_deps_file(joinpath(@__DIR__, "deps.jl"), [lcioproducts; wrapproducts])
