@@ -27,6 +27,11 @@ download_info = Dict(
     Linux(:x86_64, libc=:glibc, compiler_abi=CompilerABI(:gcc8, :cxx11)) => ("$bin_prefix/LCIOBuilder.v2.12.1-4.x86_64-linux-gnu-gcc8-cxx11.tar.gz", "f4dde09b0975e4c4f280e4be08354356232e0b892f9d3ec56c22bbf6b645f986"),
 )
 
+transform_platform(platform) = typeof(platform)(platform.arch;libc=platform.libc,call_abi=platform.call_abi,compiler_abi=CompilerABI(max(platform.compiler_abi.gcc_version,:gcc7),:cxx11))
+transform_platform(platform::MacOS) = MacOS(:x86_64)
+
+# Install unsatisfied or updated dependencies:
+unsatisfied = any(!satisfied(p; verbose=verbose) for p in lcioproducts)
 if LCIO_DIR == ""
     platform = transform_platform(platform_key_abi())
     if haskey(download_info, platform)
@@ -71,8 +76,6 @@ wrapproducts = [
 
 # Install unsatisfied or updated dependencies:
 unsatisfied = any(!satisfied(p; verbose=verbose) for p in wrapproducts)
-transform_platform(platform) = typeof(platform)(platform.arch;libc=platform.libc,call_abi=platform.call_abi,compiler_abi=CompilerABI(max(platform.compiler_abi.gcc_version,:gcc7),:cxx11))
-transform_platform(platform::MacOS) = MacOS(:x86_64)
 if LCIOJL_DIR == ""
     platform = transform_platform(platform_key_abi())
     if haskey(download_info, platform)
