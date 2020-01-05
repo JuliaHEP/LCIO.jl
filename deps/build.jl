@@ -27,22 +27,26 @@ download_info = Dict(
     Linux(:x86_64, libc=:glibc, compiler_abi=CompilerABI(:gcc8, :cxx11)) => ("$bin_prefix/LCIOBuilder.v2.12.1-4.x86_64-linux-gnu-gcc8-cxx11.tar.gz", "f4dde09b0975e4c4f280e4be08354356232e0b892f9d3ec56c22bbf6b645f986"),
 )
 
-# Install unsatisfied or updated dependencies:
-unsatisfied = any(!satisfied(p; verbose=verbose) for p in lcioproducts)
-dl_info = choose_download(download_info, platform_key_abi())
-if dl_info === nothing && unsatisfied
-    # If we don't have a compatible .tar.gz to download, complain.
-    # Alternatively, you could attempt to install from a separate provider,
-    # build from source or something even more ambitious here.
-    error("Your platform (\"$(Sys.MACHINE)\", parsed as \"$(triplet(platform_key_abi()))\") is not supported by this package!")
+if LCIO_DIR == ""
+    platform = transform_platform(platform_key_abi())
+    if haskey(download_info, platform)
+        url, tarball_hash = download_info[platform]
+        if unsatisfied || !isinstalled(url, tarball_hash; prefix=lcioprefix)
+            # Download and install binaries
+            install(url, tarball_hash; prefix=lcioprefix, force=true, verbose=verbose,ignore_platform=true)
+        end
+    elseif unsatisfied
+        # If we don't have a BinaryProvider-compatible .tar.gz to download, complain.
+        # Alternatively, you could attempt to install from a separate provider,
+        # build from source or something even more ambitious here.
+        error("Your platform $(triplet(platform)) is not supported by this package!")
+    end
+else
+    if unsatisfied
+        error("The required libraries were not found in the provided LCIO_DIR directory $LCIO_DIR")
+    end
 end
 
-# If we have a download, and we are unsatisfied (or the version we're
-# trying to install is not itself installed) then load it up!
-if unsatisfied || !isinstalled(dl_info...; prefix=lcioprefix)
-    # Download and install binaries
-    install(dl_info...; prefix=lcioprefix, force=true, verbose=verbose)
-end
 ######################################################
 
 ################### LCIO Wrapper #####################
@@ -72,13 +76,10 @@ transform_platform(platform::MacOS) = MacOS(:x86_64)
 if LCIOJL_DIR == ""
     platform = transform_platform(platform_key_abi())
     if haskey(download_info, platform)
-        if !supported
-            error("Julia version $VERSION is not supported for binary download. Please build libcxxwrap-julia from source and set the JLCXX_DIR environment variable to the build dir or installation prefix.")
-        end
         url, tarball_hash = download_info[platform]
-        if unsatisfied || !isinstalled(url, tarball_hash; prefix=prefix)
+        if unsatisfied || !isinstalled(url, tarball_hash; prefix=wrapprefix)
             # Download and install binaries
-            install(url, tarball_hash; prefix=prefix, force=true, verbose=verbose,ignore_platform=true)
+            install(url, tarball_hash; prefix=wrapprefix, force=true, verbose=verbose,ignore_platform=true)
         end
     elseif unsatisfied
         # If we don't have a BinaryProvider-compatible .tar.gz to download, complain.
