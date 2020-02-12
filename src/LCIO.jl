@@ -1,6 +1,5 @@
 module LCIO
-using CxxWrap
-const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
+const depsfile = joinpath(dirname(@__DIR__), "deps", "deps.jl")
 if !isfile(depsfile)
   error("$depsfile not found, CxxWrap did not build properly")
 end
