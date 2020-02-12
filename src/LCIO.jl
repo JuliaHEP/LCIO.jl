@@ -5,7 +5,7 @@ if !isfile(depsfile)
   error("$depsfile not found, CxxWrap did not build properly")
 end
 include(depsfile)
-@wrapmodule(liblciowrap)
+@wrapmodule(lciowrap)
 
 function __init__()
   @initcxx

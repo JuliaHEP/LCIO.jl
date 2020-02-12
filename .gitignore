@@ -3,6 +3,7 @@
 *.jl.mem
 *~
 *.slcio
+*.log
 examples/
 deps/deps.jl
 deps/usr
