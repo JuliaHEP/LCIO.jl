@@ -1,7 +1,8 @@
 LCIO bindings for Julia
 =======================
-Build Status: [![Build Status](https://travis-ci.com/jstrube/LCIO.jl.svg?branch=master)](https://travis-ci.com/jstrube/LCIO.jl)
-Documentation Status: [![Documentation Status](https://readthedocs.org/projects/lciojl/badge/?version=latest)](https://lciojl.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.com/jstrube/LCIO.jl.svg?branch=master)](https://travis-ci.com/jstrube/LCIO.jl)
+[![Documentation Status](https://readthedocs.org/projects/lciojl/badge/?version=latest)](https://lciojl.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3666947.svg)](https://doi.org/10.5281/zenodo.3666947)
 
 
 Introduction
