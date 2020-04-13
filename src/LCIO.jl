@@ -1,16 +1,30 @@
 module LCIO
-const depsfile = joinpath(dirname(@__DIR__), "deps", "deps.jl")
-if !isfile(depsfile)
-  error("$depsfile not found, CxxWrap did not build properly")
+
+using LCIO_jll
+using CxxWrap
+using LCIO_Julia_Wrapper_jll
+
+function open(f::Function, fn::AbstractString)
+    reader = createLCReader()
+    if isnull(reader)
+        return nothing
+    end
+    try
+        openFile(reader, fn)
+        f(reader)
+    finally
+        closeFile(reader)
+        deleteLCReader(reader)
+    end
 end
-include(depsfile)
+
 @wrapmodule(lciowrap)
 
 function __init__()
   @initcxx
 end
 
-import Base: getindex, length, convert, iterate
+import Base: getindex, length, convert, iterate, eltype
 export CalHit, getP4, getPosition, CellIDDecoder,
     getEventNumber, getRunNumber, getDetectorName, getCollection, getCollectionNames, # LCEvent
     getTypeName, # LCCollection
@@ -55,21 +69,6 @@ end
 # to one before this event, so that events can be read twice
 length(it::LCReader) = getNumberOfEvents(it)
 eltype(::Type{CxxPtr{LCReader}}) = LCEvent
-
-function LCIO.open(f::Function, fn::AbstractString)
-    reader = createLCReader()
-    if isnull(reader)
-        return nothing
-    end
-    try
-        openFile(reader, fn)
-        f(reader)
-    finally
-        closeFile(reader)
-        deleteLCReader(reader)
-    end
-end
-
 
 # map from names stored in collection to actual types
 LCIOTypemap = Dict(
@@ -223,12 +222,6 @@ function CalHit(h::CalHits)
     return CalHit(p[1], p[2], p[3], E)
 end
 
-# function convert(::Type(CalHit), h::CalHits)
-#     p = getPosition(h)
-#     E = getEnergy(h)
-#     return CalHit(p[1], p[2], p[3], E)
-# end
-
 function printParameters(p::LCParameters)
     println("strings:")
     for k in getStringKeys(p, StdVector{StdString}())
@@ -244,4 +237,4 @@ function printParameters(p::LCParameters)
     end
 end
 
-end
+end # module
