@@ -56,7 +56,7 @@ end
 length(it::LCReader) = getNumberOfEvents(it)
 eltype(::Type{CxxPtr{LCReader}}) = LCEvent
 
-function open(f::Function, fn::AbstractString)
+function LCIO.open(f::Function, fn::AbstractString)
     reader = createLCReader()
     if isnull(reader)
         return nothing
