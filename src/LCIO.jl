@@ -101,7 +101,7 @@ eltype(::Type{TypedCollection{T}}) where {T} = T
 # to get the typed collection, one needs to read the typename
 # then we can return the right type from the LCIOTypemap
 function getCollection(event::CxxPtr{LCEvent}, collectionName)
-	collection = getEventCollection(event, StdString(collectionName))
+	collection = getEventCollection(event, collectionName)
 	collectionType = getTypeName(collection)[]
 	return TypedCollection{LCIOTypemap[collectionType]}(collection)
 end
@@ -140,6 +140,8 @@ function openStdhep(f::Function, fn::AbstractString)
     catch
     end
 end
+
+getDetectorName(header_or_event) = getDetectorName_cxx(header_or_event)[]
 
 # stdhep files only contain one specific type of collection: MCParticle
 function readNextEvent(r::LCStdHepRdr)

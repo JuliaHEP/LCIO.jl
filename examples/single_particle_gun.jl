@@ -22,15 +22,15 @@ LCIO.open(wrt, outfile, 0)
 
 # ========== particle properties ===================
 
-momenta = [ 5. ]
+momenta = [ 5.0 ]
 
 genstat  = 1
 pdg = -13
-charge = +1.f0
+charge = +1.0f0
 mass =  0.105658f0
-theta = 85./180.f0 * pi
+theta = 85.0/180.0f0 * pi
 
-decayLen = 1.e32
+decayLen = 1.0e32
 # =================================================
 
 # write a RunHeader
