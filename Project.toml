@@ -1,6 +1,6 @@
 name = "LCIO"
 uuid = "94167541-0a4e-5fbf-aeea-474b87c587e3"
-version = "1.4.2"
+version = "1.4.3"
 author = ["Jan Strube <jan.strube@gmail.com>"]
 
 [deps]
