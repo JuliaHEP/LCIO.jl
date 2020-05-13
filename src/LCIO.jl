@@ -239,4 +239,6 @@ function printParameters(p::LCParameters)
     end
 end
 
+include("precompile_LCIO.jl")
+_precompile_()
 end # module
