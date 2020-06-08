@@ -34,7 +34,9 @@ LCIO.open("test.slcio") do reader
 iEvent = 0
 for event in reader
     iEvent += 1
-    println(getCollectionNames(event))
+    collectionList = getCollectionNames(event)
+    @test collectionList[1] == "BeamCalHits"
+    @test collectionList[length(collectionList)] == "SiVertexEndcapHits"
     @test length(getCollectionNames(event)) == 23
     @test getDetectorName(event) == "sidloi3_scint1x1"
     HcalBarrelHits = getCollection(event, "HcalBarrelHits")

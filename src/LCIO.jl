@@ -72,19 +72,19 @@ eltype(::Type{CxxPtr{LCReader}}) = LCEvent
 
 # map from names stored in collection to actual types
 LCIOTypemap = Dict(
-    "CalorimeterHit" => CalorimeterHit,
-    "Cluster" => Cluster,
-	"LCGenericObject" => LCGenericObject,
-    "LCRelation" => LCRelation,
-	"MCParticle" => MCParticle,
-    "RawCalorimeterHit" => RawCalorimeterHit,
-    "ReconstructedParticle" => ReconstructedParticle,
-	"SimCalorimeterHit" => SimCalorimeterHit,
-	"SimTrackerHit" => SimTrackerHit,
-	"Track" => Track,
-	"TrackerHit" => TrackerHit,
-    "TrackerRawData" => TrackerRawData,
-    "Vertex" => Vertex,
+    Symbol("CalorimeterHit") => CalorimeterHit,
+    Symbol("Cluster") => Cluster,
+	Symbol("LCGenericObject") => LCGenericObject,
+    Symbol("LCRelation") => LCRelation,
+	Symbol("MCParticle") => MCParticle,
+    Symbol("RawCalorimeterHit") => RawCalorimeterHit,
+    Symbol("ReconstructedParticle") => ReconstructedParticle,
+	Symbol("SimCalorimeterHit") => SimCalorimeterHit,
+	Symbol("SimTrackerHit") => SimTrackerHit,
+	Symbol("Track") => Track,
+	Symbol("TrackerHit") => TrackerHit,
+    Symbol("TrackerRawData") => TrackerRawData,
+    Symbol("Vertex") => Vertex,
 )
 
 # This version of the iteration runs length() multiple times during the iteration
@@ -102,7 +102,7 @@ eltype(::Type{TypedCollection{T}}) where {T} = T
 # then we can return the right type from the LCIOTypemap
 function getCollection(event::CxxPtr{LCEvent}, collectionName)
 	collection = getEventCollection(event, collectionName)
-	collectionType = getTypeName(collection)[]
+	collectionType = Symbol(getTypeName(collection)[])
 	return TypedCollection{LCIOTypemap[collectionType]}(collection)
 end
 
