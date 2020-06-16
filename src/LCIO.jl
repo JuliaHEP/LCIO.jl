@@ -100,7 +100,7 @@ eltype(::Type{TypedCollection{T}}) where {T} = T
 
 # to get the typed collection, one needs to read the typename
 # then we can return the right type from the LCIOTypemap
-function getCollection(event::CxxPtr{LCEvent}, collectionName)
+function getCollection(event, collectionName)
 	collection = getEventCollection(event, collectionName)
 	collectionType = Symbol(getTypeName(collection)[])
 	return TypedCollection{LCIOTypemap[collectionType]}(collection)
@@ -115,16 +115,16 @@ LCStdHepRdr(filename) = LCStdHepRdr(_LCStdHepRdrCpp(filename), LCEventImpl())
 # the LCStdHepRdr implementation in C++ is not consistent with the LCIO reader
 # this is me trying to make things a bit better
 function iterate(it::LCStdHepRdr)
-    l = length(it.r)
+    l = length(it)
     if l == 0
         return nothing
     else
-        return readNextEvent(it.r), l - 1
+        return readNextEvent(it), l - 1
     end
 end 
 function iterate(it::LCStdHepRdr, state)
     if state > 0
-        return readNextEvent(it.r), state-1
+        return readNextEvent(it), state-1
     else
         return nothing
     end
@@ -134,10 +134,10 @@ eltype(::Type{LCStdHepRdr}) = TypedCollection{MCParticle}
 
 
 function openStdhep(f::Function, fn::AbstractString)
-    reader = LCStdHepRdr(string(fn))
+    reader = LCStdHepRdr(fn)
     try
-	f(reader)
-    catch
+        f(reader)
+    finally
     end
 end
 
@@ -145,7 +145,8 @@ getDetectorName(header_or_event) = getDetectorName_cxx(header_or_event)[]
 
 # stdhep files only contain one specific type of collection: MCParticle
 function readNextEvent(r::LCStdHepRdr)
-    updateNextEvent(r.r, r.e)
+    removeCollection(r.e, "MCParticle")
+    updateNextEvent(r.r, r.e, "MCParticle")
     getCollection(r.e, "MCParticle")
 end
 
@@ -240,5 +241,5 @@ function printParameters(p::LCParameters)
 end
 
 include("precompile_LCIO.jl")
-_precompile_()
+    _precompile_()
 end # module
