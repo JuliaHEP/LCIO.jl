@@ -85,6 +85,7 @@ LCIOTypemap = Dict(
 	Symbol("TrackerHit") => TrackerHit,
     Symbol("TrackerRawData") => TrackerRawData,
     Symbol("Vertex") => Vertex,
+    Symbol("TrackerHitPlane") => TrackerHitPlane,
 )
 
 # This version of the iteration runs length() multiple times during the iteration
@@ -224,6 +225,11 @@ function CalHit(h::CalHits)
     E = getEnergy(h)
     return CalHit(p[1], p[2], p[3], E)
 end
+
+getEnergyCont(hit, i) = _getEnergyCont(hit, i-1)
+getTimeCont(hit, i) = _getTimeCont(hit, i-1)
+getPDGCont(hit, i) = _getPDGCont(hit, i-1)
+getParticleCont(hit, i) = _getParticleCont(hit, i-1)
 
 function printParameters(p::LCParameters)
     println("strings:")

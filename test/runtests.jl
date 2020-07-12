@@ -49,6 +49,13 @@ for event in reader
     for h in HcalBarrelHits
         @test 0 <= decode(h)["layer"] <= 39
         iHit += 1
+        # HcalBarrelHits is of type SimCalorimeterHit
+        @test LCIO.getNMCContributions(h) > 0
+        for iMCP = 1:LCIO.getNMCContributions(h)
+            # we're just running over the hits to make sure there's no segfault due to off-by-one access
+            # we're translating the index by -1 before calling the C++ function.
+            LCIO.getPDGCont(h, iMCP)
+        end
     end
     # test iteration -- julia counting vs. C counting
     @test l == iHit
