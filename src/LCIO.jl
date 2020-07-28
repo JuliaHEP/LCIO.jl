@@ -30,7 +30,8 @@ export CalHit, getP4, getPosition, CellIDDecoder,
     getTypeName, # LCCollection
     getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, getMomentumAtEndpoint, getMass, getCharge, # MCParticle
     getCalorimeterHits, # Cluster
-    getClusters, getType, isCompound, getMass, getCharge, getReferencePoint, getParticleIDs, getParticleIDUsed, getGoodnessOfPID, getParticles, getClusters, getTracks, getStartVertex, getEndVertex # ReconstructedParticle
+    getClusters, getType, isCompound, getMass, getCharge, getReferencePoint, getParticleIDs, getParticleIDUsed, getGoodnessOfPID, getParticles, getClusters, getTracks, getStartVertex, getEndVertex, # ReconstructedParticle
+    getRelatedFromObjects, getRelatedToObjects # LCRelationNavigator
 
 struct CalHit
 	x::Cfloat
@@ -186,24 +187,36 @@ end
 struct LCRelationNavigator
     relnav
     fromType
+    fromCaster
     toType
-    LCRelationNavigator(coll::TypedCollection) = _completeNavigator(new(LCRelNav(coll.coll)))
+    toCaster
+    function LCRelationNavigator(tc::TypedCollection)
+        relnav = _LCRelNav(coll(tc))
+        fromType = LCIOTypemap[Symbol(String(_getFromType(relnav)))]
+        fromCaster = CastOperator{fromType}()
+        toType = LCIOTypemap[Symbol(String(_getToType(relnav)))]
+        toCaster = CastOperator{toType}()
+        new(relnav, fromType, fromCaster, toType, toCaster)
+    end
 end
 
-function _completeNavigator(nav)
-    nav.fromType = LCIOTypemap[nav.relnav.getFromType()]
-    nav.toType = LCIOTypemap[nav.relnav.getToType()]
-    nav
+
+# this ensures that the types are appropriately cast
+function getRelatedToObjects(nav::LCRelationNavigator, fromObj)
+    values = Vector{CxxWrap.CxxWrapCore.CxxPtr{nav.toType}}()
+    for toObj in _getRelatedToObjects(nav.relnav, fromObj)
+        push!(values, cast(nav.toCaster, toObj))
+    end
+    return values
 end
 
 # this ensures that the types are appropriately cast
-function getRelatedToObjects(nav::LCRelationNavigator, obj)
-    [CastOperator{nav.toType}.cast(x) for x in getRelatedToObjects(nav.relnav)]
-end
-
-# this ensures that the types are appropriately cast
-function getRelatedFromObjects(nav::LCRelationNavigator, obj)
-    [CastOperator{nav.fromType}.cast(x) for x in getRelatedFromObjects(nav.relnav)]
+function getRelatedFromObjects(nav::LCRelationNavigator, toObj)
+    values = Vector{CxxWrap.CxxWrapCore.CxxPtr{nav.fromType}}()
+    for fromObj in _getRelatedFromObjects(nav.relnav, toObj)
+        push!(values, cast(nav.fromCaster, fromObj))
+    end
+    return values
 end
 
 # should work for all particle types
@@ -247,5 +260,5 @@ function printParameters(p::LCParameters)
 end
 
 include("precompile_LCIO.jl")
-    _precompile_()
+_precompile_()
 end # module

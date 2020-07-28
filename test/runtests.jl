@@ -36,10 +36,10 @@ for event in reader
     iEvent += 1
     collectionList = getCollectionNames(event)
     @test collectionList[1] == "BeamCalHits"
-    @test collectionList[length(collectionList)] == "SiVertexEndcapHits"
-    @test length(getCollectionNames(event)) == 23
-    @test getDetectorName(event) == "sidloi3_scint1x1"
-    HcalBarrelHits = getCollection(event, "HcalBarrelHits")
+    @test collectionList[length(collectionList)] == "VertexJets"
+    @test length(getCollectionNames(event)) == 69
+    @test getDetectorName(event) == "SiD_o2_v03"
+    HcalBarrelHits = getCollection(event, "HCalBarrelHits")
     @test getTypeName(HcalBarrelHits) == "LCIO.SimCalorimeterHit"
     decode = CellIDDecoder(HcalBarrelHits)
     l = length(HcalBarrelHits)
@@ -59,6 +59,17 @@ for event in reader
     end
     # test iteration -- julia counting vs. C counting
     @test l == iHit
+    if iEvent == 1
+        recoParticles = getCollection(event, "PandoraPFOs")
+        mcParticles = getCollection(event, "MCParticle")
+        reco2mcpRelation = getCollection(event, "RecoMCTruthLink")
+        relationNavigator = LCIO.LCRelationNavigator(reco2mcpRelation)
+        for rp in recoParticles
+            mcpList = getRelatedToObjects(relationNavigator, rp)
+            @test length(mcpList) > 0
+            println(norm(getMomentum(rp)), norm(getMomentum(mcpList[1])))
+        end
+    end
 end
 @test iEvent == length(reader)
 end
