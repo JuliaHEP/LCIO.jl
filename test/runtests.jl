@@ -67,7 +67,7 @@ for event in reader
         for rp in recoParticles
             mcpList = getRelatedToObjects(relationNavigator, rp)
             @test length(mcpList) > 0
-            println(norm(getMomentum(rp)), norm(getMomentum(mcpList[1])))
+            println("Reco: ", getMomentum(rp), "\tMC Particle: ", getMomentum(mcpList[1]))
         end
     end
 end
