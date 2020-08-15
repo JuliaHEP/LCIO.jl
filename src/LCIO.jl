@@ -4,13 +4,13 @@ using LCIO_jll
 using CxxWrap
 using LCIO_Julia_Wrapper_jll
 
-function open(f::Function, fn::AbstractString)
+function open(f::Function, filename::AbstractString)
     reader = createLCReader()
     if isnull(reader)
         return nothing
     end
     try
-        openFile(reader, fn)
+        openFile(reader, filename)
         f(reader)
     finally
         closeFile(reader)
@@ -31,8 +31,9 @@ export CalHit, getP4, getPosition, CellIDDecoder,
     getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, getMomentumAtEndpoint, getMass, getCharge, # MCParticle
     getCalorimeterHits, # Cluster
     getClusters, getType, isCompound, getMass, getCharge, getReferencePoint, getParticleIDs, getParticleIDUsed, getGoodnessOfPID, getParticles, getClusters, getTracks, getStartVertex, getEndVertex, # ReconstructedParticle
-    getRelatedFromObjects, getRelatedToObjects # LCRelationNavigator
-
+    getRelatedFromObjects, getRelatedToObjects, # LCRelationNavigator
+    PIDHandler, getAlgorithmID, getParameterIndex, getParticleID, # PIDHandler
+    getParameters # ParticleID
 struct CalHit
 	x::Cfloat
 	y::Cfloat
@@ -65,6 +66,8 @@ function iterate(it::CxxPtr{LCReader}, state)
     end
     return (event, state - 1)
 end
+
+getindex(vec::CxxWrap.CxxWrapCore.ConstCxxRef{CxxWrap.StdLib.StdVector{Float32}}, idx) = vec[][idx]
 
 # FIXME: Upstream bug: getNumberOfEvents resets the state of the reader
 # to one before this event, so that events can be read twice
@@ -243,6 +246,9 @@ getEnergyCont(hit, i) = _getEnergyCont(hit, i-1)
 getTimeCont(hit, i) = _getTimeCont(hit, i-1)
 getPDGCont(hit, i) = _getPDGCont(hit, i-1)
 getParticleCont(hit, i) = _getParticleCont(hit, i-1)
+
+
+PIDHandler(typedColl::TypedCollection) = PIDHandler(coll(typedColl))
 
 function printParameters(p::LCParameters)
     println("strings:")
