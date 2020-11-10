@@ -67,7 +67,7 @@ function iterate(it::CxxPtr{LCReader}, state)
     return (event, state - 1)
 end
 
-getindex(vec::CxxWrap.CxxWrapCore.ConstCxxRef{CxxWrap.StdLib.StdVector{Float32}}, idx) = vec[][idx]
+getindex(vec::CxxWrap.CxxWrapCore.ConstCxxRef{CxxWrap.StdLib.StdVector{Float32}}, idx::Int32) = vec[][idx]
 
 # FIXME: Upstream bug: getNumberOfEvents resets the state of the reader
 # to one before this event, so that events can be read twice

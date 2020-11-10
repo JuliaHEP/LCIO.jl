@@ -1,17 +1,19 @@
 using LCIO
 using Test
+using LinearAlgebra
+import CxxWrap: isnull
 
 # test iteration
-LCIO.open("test.slcio") do reader
+LCIO.open("test_DST.slcio") do reader
 for event in reader
-    mcparts = getCollection(event, "MCParticle")
+    mcparts = getCollection(event, "MCParticlesSkimmed")
     for p in mcparts
         e = getEnergy(p)
         @test e > 0
         momentum = getMomentum(p)
         if getPDG(p) != 22
             # tolerance, since we're dealing with floats
-            @test getEnergy(p)^2 - sum(momentum.^2) > -1e-12
+            @test getEnergy(p)^2 - sum(momentum.^2) > -1e-11
         else
             @test abs(getEnergy(p)^2 - sum(momentum.^2)) < 1e-12
         end
@@ -27,10 +29,10 @@ for event in reader
     end
 end
 end
-println("First iteration successful")
+println("DST test successful")
 
 # test that everything is closed and opened properly
-LCIO.open("test.slcio") do reader
+LCIO.open("test_hits.slcio") do reader
 iEvent = 0
 for event in reader
     iEvent += 1
@@ -59,22 +61,78 @@ for event in reader
     end
     # test iteration -- julia counting vs. C counting
     @test l == iHit
-    if iEvent == 1
-        recoParticles = getCollection(event, "PandoraPFOs")
-        mcParticles = getCollection(event, "MCParticle")
-        reco2mcpRelation = getCollection(event, "RecoMCTruthLink")
-        relationNavigator = LCIO.LCRelationNavigator(reco2mcpRelation)
-        for rp in recoParticles
-            mcpList = getRelatedToObjects(relationNavigator, rp)
-            @test length(mcpList) > 0
-            println("Reco: ", getMomentum(rp), "\tMC Particle: ", getMomentum(mcpList[1]))
-        end
-    end
 end
 @test iEvent == length(reader)
 end
-println("Second iteration successful")
+println("Hit test successful")
 
+# test that everything is closed and opened properly
+LCIO.open("test_miniDST.slcio") do reader
+    iEvent = 0
+    for event in reader
+        iEvent += 1
+        recoParticles = getCollection(event, "PandoraPFOs")
+        mcParticles = getCollection(event, "MCParticlesSkimmed")
+        reco2mcpRelation = getCollection(event, "RecoMCTruthLink")
+        relationNavigator = LCIO.LCRelationNavigator(reco2mcpRelation)
+        diff = 0.0
+        nParticles = 0
+        for rp in recoParticles
+            mcpList = getRelatedToObjects(relationNavigator, rp)
+            @test length(mcpList) > 0
+            diff += norm(getMomentum(rp) - getMomentum(mcpList[1]))
+            nParticles += 1
+            isnull(getParticleIDUsed(rp)) || println(getParticleIDUsed(rp))
+        end
+        println("Average difference between Reco and MCParticle momentum: ", diff/nParticles, " GeV")
+        jets = getCollection(event, "Refined2Jets")
+        if length(jets) < 2
+            continue
+        end
+        jetPIDh = PIDHandler(jets)
+        ilcfi = LCIO.getAlgorithmID(jetPIDh, "lcfiplus")
+        @show ilcfi
+        ibtag = getParameterIndex(jetPIDh, ilcfi, "BTag") # algorithm 0 is "lcfiplus"
+        ictag = getParameterIndex(jetPIDh, ilcfi, "CTag") # algorithm 0 is "lcfiplus"
+        iotag = getParameterIndex(jetPIDh, ilcfi, "OTag") # algorithm 0 is "lcfiplus"
+        @show ibtag
+        @show ictag
+        @show iotag
+        pfoPIDh = PIDHandler(recoParticles)
+        idEdx = LCIO.getAlgorithmID(pfoPIDh, "dEdxPID")
+        iLikelihood = LCIO.getAlgorithmID(pfoPIDh, "LikelihoodPID")
+        @show iLikelihood
+        iKaonLike = getParameterIndex(pfoPIDh, iLikelihood, "kaonLikelihood") # algorithm 3 is "LikelihoodPID"
+        iPionLike = getParameterIndex(pfoPIDh, iLikelihood, "pionLikelihood")
+        @show iKaonLike
+        @show iPionLike
+        for j in jets
+            tagList = getParameters(getParticleID(jetPIDh, j, ilcfi))
+            if !isnull(tagList)
+                btag = tagList[ibtag]
+                ctag = tagList[ictag]
+                otag = tagList[iotag]
+                println(btag, "\t", ctag, "\t", otag)
+            end
+            parts = getParticles(j)
+            for p in parts
+                pidList = getParameters(getParticleID(pfoPIDh, p, iLikelihood))
+                print(length(pidList), "\t")
+                if length(pidList) > 0
+                    L_pi = pidList[iPionLike]
+                    L_K = pidList[iPionLike]
+                    @show L_pi
+                    @show L_K
+                    print("Kaon PID: ", L_K/(L_pi+L_K)) 
+                end
+                println()
+            end
+        end
+    end
+    @test iEvent == length(reader)
+end
+println("MiniDST test successful")
+    
 # test the stdhep reader
 iEvent = 0
 LCIO.openStdhep("test.stdhep") do reader
@@ -89,7 +147,7 @@ LCIO.openStdhep("test.stdhep") do reader
     end
 end
 @test iEvent > 0
-println("Stdhep iteration successful: ", iEvent, " events")
+println("Stdhep test successful: ", iEvent, " events")
 
 # test creating a new file and writing out a particle
 wrt = LCIO.createLCWriter()

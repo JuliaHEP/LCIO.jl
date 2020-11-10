@@ -11,12 +11,13 @@ CxxWrap = "1f15a43c-97ca-5a2a-ae31-89f07a497df4"
 
 [compat]
 CxxWrap = "0.11"
-julia = "1.4"
-LCIO_jll = "2.15"
-LCIO_Julia_Wrapper_jll = "0.12"
+julia = "1.5"
+LCIO_jll = "2.15.3"
+LCIO_Julia_Wrapper_jll = "0.13"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [targets]
-test = ["Test"]
+test = ["Test", "LinearAlgebra"]
