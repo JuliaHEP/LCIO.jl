@@ -155,16 +155,38 @@ function readNextEvent(r::LCStdHepRdr)
     getCollection(r.e, "MCParticle")
 end
 
-# we want arrays for the 3-vectors, but we get tuples from c++ 
-getPosition(hit) = Float64[i for i in _getPosition(hit)]
+# the method with the temp arrays 
+# is faster than the tuple method
+# see https://github.com/jstrube/LCIO.jl/issues/4#issuecomment-735030469
+function getPosition(hit) 
+    x3 = Array{Float64,1}(undef, 3)
+    valid = getPosition3(hit, x3)
+    return x3
+end
 
-getMomentum(particle) = Float64[i for i in _getMomentum(particle)]
+function getMomentum(particle)
+    p3 = Array{Float64,1}(undef, 3)
+    valid = getMomentum3(particle, p3)
+    return p3
+end
 
-getVertex(particle) = Float64[i for i in _getVertex(particle)]
+function getVertex(particle)
+    x3 = Array{Float64,1}(undef, 3)
+    valid = getVertex3(particle, x3)
+    return x3
+end
 
-getEndpoint(particle) = Float64[i for i in _getEndpoint(particle)]
+function getEndpoint(particle)
+    x3 = Array{Float64,1}(undef, 3)
+    valid = getEndpoint3(particle, x3)
+    return x3
+end
 
-getMomentumAtEndpoint(particle) = Float64[i for i in _getMomentumAtEndpoint(particle)]
+function getMomentumAtEndpoint(particle)
+    p3 = Array{Float64,1}(undef, 3)
+    valid = getMomentumAtEndpoint3(particle, p3)
+    return p3
+end
 
 # the navigator gets initialized with a collection
 # it defers the actual work to the C++ implementation
