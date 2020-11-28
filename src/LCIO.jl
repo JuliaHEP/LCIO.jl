@@ -155,35 +155,16 @@ function readNextEvent(r::LCStdHepRdr)
     getCollection(r.e, "MCParticle")
 end
 
-function getPosition(hit)
-    p3 = Array{Float64,1}(undef, 3)
-    valid = getPosition3(hit, p3)
-    return p3
-end
+# we want arrays for the 3-vectors, but we get tuples from c++ 
+getPosition(hit) = Float64[i for i in _getPosition(hit)]
 
-function getMomentum(particle)
-    p3 = Array{Float64,1}(undef, 3)
-    valid = getMomentum3(particle, p3)
-    return p3
-end
+getMomentum(particle) = Float64[i for i in _getMomentum(particle)]
 
-function getVertex(particle)
-    p3 = Array{Float64,1}(undef, 3)
-    valid = getVertex3(particle, p3)
-    return valid, p3
-end
+getVertex(particle) = Float64[i for i in _getVertex(particle)]
 
-function getEndpoint(particle)
-    p3 = Array{Float64,1}(undef, 3)
-    valid = getEndpoint3(particle, p3)
-    return valid, p3
-end
+getEndpoint(particle) = Float64[i for i in _getEndpoint(particle)]
 
-function getMomentumAtEndpoint(particle)
-    p3 = Array{Float64,1}(undef, 3)
-    valid = getMomentumAtEndpoint3(particle, p3)
-    return valid, p3
-end
+getMomentumAtEndpoint(particle) = Float64[i for i in _getMomentumAtEndpoint(particle)]
 
 # the navigator gets initialized with a collection
 # it defers the actual work to the C++ implementation
