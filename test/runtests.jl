@@ -80,6 +80,8 @@ LCIO.open("test_miniDST.slcio") do reader
         for rp in recoParticles
             mcpList = getRelatedToObjects(relationNavigator, rp)
             @test length(mcpList) > 0
+            mcpWeights = getRelatedToWeights(relationNavigator, rp)
+            @test length(mcpList) == length(mcpWeights)
             diff += norm(getMomentum(rp) - getMomentum(mcpList[1]))
             nParticles += 1
             isnull(getParticleIDUsed(rp)) || println(getParticleIDUsed(rp))
