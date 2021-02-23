@@ -225,9 +225,9 @@ function getRelatedFromObjects(nav::LCRelationNavigator, toObj)
     return values
 end
 
-getRelatedFromWeights(nav::LCRelationNavigator, toObj) = _getRelatedFromWeights(nav.relnav, toObj)
+getRelatedFromWeights(nav::LCRelationNavigator, toObj) = _getRelatedFromWeights(nav.relnav, toObj)[]
 
-getRelatedToWeights(nav::LCRelationNavigator, toObj) = _getRelatedToWeights(nav.relnav, toObj)
+getRelatedToWeights(nav::LCRelationNavigator, toObj) = _getRelatedToWeights(nav.relnav, toObj)[]
 
 # should work for all particle types
 function getP4(x)
