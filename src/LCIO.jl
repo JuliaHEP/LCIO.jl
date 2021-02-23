@@ -31,7 +31,7 @@ export CalHit, getP4, getPosition, CellIDDecoder,
     getEnergy, getParents, getDaughters, getPDG, getGeneratorStatus, getSimulatorStatus, isCreatedInSimulation, isBackScatter, vertexIsNotEndpointOfParent, isDecayedInCalorimeter, hasLeftDetector, isStopped, isOverlay, getVertex, getTime, getEndpoint, getMomentum, getMomentumAtEndpoint, getMass, getCharge, # MCParticle
     getCalorimeterHits, # Cluster
     getClusters, getType, isCompound, getMass, getCharge, getReferencePoint, getParticleIDs, getParticleIDUsed, getGoodnessOfPID, getParticles, getClusters, getTracks, getStartVertex, getEndVertex, # ReconstructedParticle
-    getRelatedFromObjects, getRelatedToObjects, # LCRelationNavigator
+    getRelatedFromObjects, getRelatedToObjects, getRelatedFromWeights, getRelatedToWeights, # LCRelationNavigator
     PIDHandler, getAlgorithmID, getParameterIndex, getParticleID, # PIDHandler
     getParameters # ParticleID
 struct CalHit
@@ -224,6 +224,10 @@ function getRelatedFromObjects(nav::LCRelationNavigator, toObj)
     end
     return values
 end
+
+getRelatedFromWeights(nav::LCRelationNavigator, toObj) = _getRelatedFromWeights(nav.relnav, toObj)
+
+getRelatedToWeights(nav::LCRelationNavigator, toObj) = _getRelatedToWeights(nav.relnav, toObj)
 
 # should work for all particle types
 function getP4(x)
