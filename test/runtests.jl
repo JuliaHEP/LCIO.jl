@@ -6,6 +6,23 @@ import CxxWrap: isnull
 # test iteration
 LCIO.open("test_DST.slcio") do reader
 for event in reader
+    # for c in getCollectionNames(event)
+    #     println(c)
+    # end
+    for vtx in getCollection(event, "BuildUpVertex")
+        cv = LCIO.getCovMatrix(vtx)
+        cvm = getCovarianceMatrix(vtx)
+        for i in size(cvm, 1)
+            @test cv[i] == cvm[1, i]
+        end
+    end
+    for trk in getCollection(event, "MarlinTrkTracks")
+        cv = LCIO.getCovMatrix(trk)
+        cvm = getCovarianceMatrix(trk)
+        for i in size(cvm, 1)
+            @test cv[i] == cvm[1, i]
+        end
+    end
     mcparts = getCollection(event, "MCParticlesSkimmed")
     for p in mcparts
         e = getEnergy(p)
@@ -37,6 +54,9 @@ iEvent = 0
 for event in reader
     iEvent += 1
     collectionList = getCollectionNames(event)
+    # for c in collectionList
+    #     println(c)
+    # end
     @test collectionList[1] == "BeamCalHits"
     @test collectionList[length(collectionList)] == "VertexJets"
     @test length(getCollectionNames(event)) == 69
@@ -84,50 +104,50 @@ LCIO.open("test_miniDST.slcio") do reader
             @test length(mcpList) == length(mcpWeights)
             diff += norm(getMomentum(rp) - getMomentum(mcpList[1]))
             nParticles += 1
-            isnull(getParticleIDUsed(rp)) || println(getParticleIDUsed(rp))
+            # isnull(getParticleIDUsed(rp)) || println(getParticleIDUsed(rp))
         end
-        println("Average difference between Reco and MCParticle momentum: ", diff/nParticles, " GeV")
+        # println("Average difference between Reco and MCParticle momentum: ", diff/nParticles, " GeV")
         jets = getCollection(event, "Refined2Jets")
         if length(jets) < 2
             continue
         end
         jetPIDh = PIDHandler(jets)
         ilcfi = LCIO.getAlgorithmID(jetPIDh, "lcfiplus")
-        @show ilcfi
+        # @show ilcfi
         ibtag = getParameterIndex(jetPIDh, ilcfi, "BTag") # algorithm 0 is "lcfiplus"
         ictag = getParameterIndex(jetPIDh, ilcfi, "CTag") # algorithm 0 is "lcfiplus"
         iotag = getParameterIndex(jetPIDh, ilcfi, "OTag") # algorithm 0 is "lcfiplus"
-        @show ibtag
-        @show ictag
-        @show iotag
+        # @show ibtag
+        # @show ictag
+        # @show iotag
         pfoPIDh = PIDHandler(recoParticles)
         idEdx = LCIO.getAlgorithmID(pfoPIDh, "dEdxPID")
         iLikelihood = LCIO.getAlgorithmID(pfoPIDh, "LikelihoodPID")
-        @show iLikelihood
+        # @show iLikelihood
         iKaonLike = getParameterIndex(pfoPIDh, iLikelihood, "kaonLikelihood") # algorithm 3 is "LikelihoodPID"
         iPionLike = getParameterIndex(pfoPIDh, iLikelihood, "pionLikelihood")
-        @show iKaonLike
-        @show iPionLike
+        # @show iKaonLike
+        # @show iPionLike
         for j in jets
             tagList = getParameters(getParticleID(jetPIDh, j, ilcfi))
             if !isnull(tagList)
                 btag = tagList[ibtag]
                 ctag = tagList[ictag]
                 otag = tagList[iotag]
-                println(btag, "\t", ctag, "\t", otag)
+                # println(btag, "\t", ctag, "\t", otag)
             end
             parts = getParticles(j)
             for p in parts
                 pidList = getParameters(getParticleID(pfoPIDh, p, iLikelihood))
-                print(length(pidList), "\t")
+                # print(length(pidList), "\t")
                 if length(pidList) > 0
                     L_pi = pidList[iPionLike]
                     L_K = pidList[iPionLike]
-                    @show L_pi
-                    @show L_K
-                    print("Kaon PID: ", L_K/(L_pi+L_K)) 
+                    # @show L_pi
+                    # @show L_K
+                    # print("Kaon PID: ", L_K/(L_pi+L_K)) 
                 end
-                println()
+                # println()
             end
         end
     end

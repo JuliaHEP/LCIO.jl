@@ -33,7 +33,8 @@ export CalHit, getP4, getPosition, CellIDDecoder,
     getClusters, getType, isCompound, getMass, getCharge, getReferencePoint, getParticleIDs, getParticleIDUsed, getGoodnessOfPID, getParticles, getClusters, getTracks, getStartVertex, getEndVertex, # ReconstructedParticle
     getRelatedFromObjects, getRelatedToObjects, getRelatedFromWeights, getRelatedToWeights, # LCRelationNavigator
     PIDHandler, getAlgorithmID, getParameterIndex, getParticleID, # PIDHandler
-    getParameters # ParticleID
+    getParameters, # ParticleID
+    getCovarianceMatrix # Track / Vertex
 struct CalHit
 	x::Cfloat
 	y::Cfloat
@@ -272,6 +273,24 @@ function printParameters(p::LCParameters)
     end
 end
 
-include("precompile_LCIO.jl")
-_precompile_()
+# getCovMatrix returns a stupid vector 
+# we want a proper matrix
+# this function should work for tracks (5 parameters) and vertices
+function getCovarianceMatrix(obj)
+    vec = getCovMatrix(obj)
+    N = round(Int, 0.5*(√(8*length(vec)+1)-1))
+    mat = zeros((N, N))
+    idx = 1
+    for i = 1:N, j=1:N
+        if i>j
+            continue
+        end
+        mat[i, j] = mat[j, i] = vec[idx]
+        idx += 1
+    end
+    return mat
+end
+
+# include("precompile_LCIO.jl")
+# _precompile_()
 end # module
