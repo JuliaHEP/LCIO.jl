@@ -18,7 +18,7 @@ function open(f::Function, filename::AbstractString)
     end
 end
 
-@wrapmodule(() -> LCIO_Julia_Wrapper_jll.lciowrap)
+@wrapmodule(() -> LCIO_jll.lciowrap)
 
 function __init__()
   @initcxx
