@@ -1,6 +1,6 @@
 name = "LCIO"
 uuid = "94167541-0a4e-5fbf-aeea-474b87c587e3"
-version = "1.9.3"
+version = "1.9.4"
 author = ["Jan Strube <jan.strube@gmail.com>"]
 
 [deps]
@@ -10,10 +10,10 @@ LCIO_Julia_Wrapper_jll = "1fe59b3e-ae39-56b2-a121-c4c5e6ddab56"
 CxxWrap = "1f15a43c-97ca-5a2a-ae31-89f07a497df4"
 
 [compat]
-CxxWrap = "0.11"
-julia = "1.5"
-LCIO_jll = "2.15.3"
-LCIO_Julia_Wrapper_jll = "0.13"
+CxxWrap = "0.17"
+julia = "1.10"
+LCIO_jll = "2.22.6"
+LCIO_Julia_Wrapper_jll = "0.13.4"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
